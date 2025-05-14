@@ -44,18 +44,30 @@ const productSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  image: {
+  variants: [{
+    color: {
+      type: String,
+      required: true
+    },
+    image: {
+      type: String,
+      required: true
+    },
+    images: [String],
+  }]
+  ,
+  lensColor: {
     type: String,
-    trim: true,
+    trim: true
   },
   customerPrice: {
     type: Number,
     required: true,
     min: 0,
   },
-  color: {
+  frameMaterial: {
     type: String,
-    trim: true,
+    trim: true
   },
   frond: {
     type: Boolean,
@@ -64,7 +76,18 @@ const productSchema = new mongoose.Schema({
   iva: {
     type: Boolean,
     default: false,
+  }, faceShape: {
+    type: String,
+    trim: true,
+  }, frameShape: {
+    type: String,
+    trim: true,
+  },
+  sales: {
+    type: Number,
+    default: 0
   }
+
 }, {
   timestamps: true
 });
