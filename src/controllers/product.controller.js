@@ -1,5 +1,5 @@
 // src/controllers/product.controller.js
-import { getAllProductsServices, getCatalogOfProductsServices } from '../services/product.service.js';
+import { getAllProductsServices, getCatalogByFilterServices, getProductSelectedServices } from '../services/product.service.js';
 
 
 export const getAllProducts = async (req, res) => {
@@ -20,7 +20,7 @@ Para el caso del precio ASC, DESC,alfabeticamente y mas vendidos se manejara de 
 ?sort=alphabetical
 ?sort=bestSellers
 */
-export const getCatalogOfProducts = async (req, res) => {
+export const getCatalogByFilter = async (req, res) => {
   try {
 
     const page = Math.max(1, parseInt(req.query.page) || 1);
@@ -33,9 +33,9 @@ export const getCatalogOfProducts = async (req, res) => {
     const frameColor = req.query.frameColor || null;
     const lensColor = req.query.lensColor || null;
     const frameMaterial = req.query.frameMaterial || null;
-    const sort = req.query.sort || null; 
+    const sort = req.query.sort || null;
 
-    const { products, total } = await getCatalogOfProductsServices(page, limit, brand, minPrice, maxPrice, faceShape, frameShape, frameColor, lensColor, frameMaterial,sort);
+    const { products, total } = await getCatalogByFilterServices(page, limit, brand, minPrice, maxPrice, faceShape, frameShape, frameColor, lensColor, frameMaterial, sort);
 
     res.json({
       products,
@@ -44,7 +44,19 @@ export const getCatalogOfProducts = async (req, res) => {
       totalPages: Math.ceil(total / limit)
     });
   } catch (error) {
-    console.error('Error al obtener el catálogo de productos:', error);
+    console.error('Error getCatalogByFilter :', error);
     res.status(500).json({ message: 'Error del servidor' });
   }
 };
+
+export const getProductSelected = async (req, res) => {
+  try {
+    const id = req.query.id || null;
+    const product = await getProductSelectedServices(id);
+
+    res.json({ product });
+  } catch (error) {
+    console.error('Error getProductSelected:', error);
+    res.status(500).json({ message: 'Error del servidor' });
+  }
+}

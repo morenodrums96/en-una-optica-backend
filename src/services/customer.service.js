@@ -1,5 +1,7 @@
 import { Customer } from '../models/customer.model.js';
 import { Product } from '../models/product.model.js';
+import { AnonymousFavorite } from '../models/anonymousFavoriteSchema.model.js';
+
 import mongoose from 'mongoose';
 
 export const getAllCustomersService = async () => {
@@ -38,4 +40,50 @@ export const postFavoritesService = async (customerId, productId) => {
     await customer.save();
 
     return await customer.populate('favorites', 'name brand image customerPrice');
+};
+
+
+export const postGuestFavoriteServices = async (sessionId, productId) => {
+
+    const entry = await AnonymousFavorite.findOne({ sessionId });
+
+    if (entry) {
+        const alreadyExists = entry.favorites.some(fav => fav.equals(productId));
+        if (!alreadyExists) entry.favorites.push(productId);
+        entry.updatedAt = new Date();
+        await entry.save();
+    } else {
+        await AnonymousFavorite.create({
+            sessionId,
+            favorites: [productId]
+        });
+    }
+}
+
+export const getGuestFavoriteServices = async (sessionId) => {
+
+    return AnonymousFavorite.findOne({ sessionId }).populate('favorites');
+
+}
+
+export const postMergeGuestFavoritesServices = async (sessionId, userId) => {
+    const guest = await AnonymousFavorite.findOne({ sessionId });
+
+    if (!guest || !guest.favorites.length) {
+        throw new Error('NO_GUEST_FAVORITES'); // lanza error específico
+    }
+
+    const customer = await Customer.findById(userId);
+    if (!customer) throw new Error('CUSTOMER_NOT_FOUND');
+
+    guest.favorites.forEach(productId => {
+        if (!customer.favorites.some(fav => fav.equals(productId))) {
+            customer.favorites.push(productId);
+        }
+    });
+
+    await customer.save();
+    await AnonymousFavorite.deleteOne({ sessionId });
+
+    return customer; // opcional si quieres usarlo en el controller
 };

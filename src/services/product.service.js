@@ -5,7 +5,7 @@ export const getAllProductsServices = async () => {
     return products;
 };
 
-export const getCatalogOfProductsServices = async (
+export const getCatalogByFilterServices = async (
     page = 1,
     limit = 12,
     brand = null,
@@ -60,11 +60,26 @@ export const getCatalogOfProductsServices = async (
         name: 1,
         brand: 1,
         customerPrice: 1,
-        variants: 1,
+        'variants._id': 1,
+        'variants.color': 1,
+        'variants.image': 1,
         _id: 1
     }).sort(sortOptions).skip(skip).limit(limit);
 
     const total = await Product.countDocuments(query);
 
     return { products, total };
+};
+
+
+export const getProductSelectedServices = async (id = null) => {
+    
+    const products = Product.findById(id, {
+        _id: 1,
+        name: 1,
+        brand: 1,
+        customerPrice: 1,
+        variants:1
+    });
+    return products;
 };
