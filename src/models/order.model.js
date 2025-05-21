@@ -13,13 +13,11 @@ const orderSchema = new mongoose.Schema({
     ref: 'Customer', // asegúrate que coincida con .model('Customers')
     required: true
   },
-
-  email: {
+  guide: {
     type: String,
     required: true,
     trim: true,
   },
-
   cellphone: {
     type: String,
     required: true,

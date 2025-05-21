@@ -30,3 +30,22 @@ export const generateOrderServices = async (orderInfor, addressInformation) => {
     await Order.create(orderInfor);
 
 };
+
+export const orderPaginationServices = async (page = 1, limit = 12, status) => {
+  const skip = (page - 1) * limit;
+
+  const query = {};
+
+  if (status) {
+    query.orderStatus = status;
+  }
+
+  const result = await Order.find(query)
+    .sort({ createdAt: -1 }) // más recientes primero
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Order.countDocuments(query);
+
+  return { result, total };
+};
