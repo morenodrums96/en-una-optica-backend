@@ -73,13 +73,17 @@ export const getCatalogByFilterServices = async (
 
 
 export const getProductSelectedServices = async (id = null) => {
-    
+
     const products = Product.findById(id, {
         _id: 1,
         name: 1,
         brand: 1,
         customerPrice: 1,
-        variants:1
+        variants: 1
     });
     return products;
 };
+
+export const registrationProductServices = async (product) => {
+    Product.create(product);
+}

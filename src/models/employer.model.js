@@ -33,6 +33,14 @@ const employerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+   status: {
+    Boolean,
+    required: true,
+  },
+  branch: {
+    type: String,
+    required: true,
+  },
   direction: {
     street: {
       type: String,

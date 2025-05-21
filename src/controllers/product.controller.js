@@ -1,5 +1,5 @@
 // src/controllers/product.controller.js
-import { getAllProductsServices, getCatalogByFilterServices, getProductSelectedServices } from '../services/product.service.js';
+import { getAllProductsServices, getCatalogByFilterServices, getProductSelectedServices, registrationProductServices } from '../services/product.service.js';
 
 
 export const getAllProducts = async (req, res) => {
@@ -53,10 +53,19 @@ export const getProductSelected = async (req, res) => {
   try {
     const id = req.query.id || null;
     const product = await getProductSelectedServices(id);
-
     res.json({ product });
   } catch (error) {
     console.error('Error getProductSelected:', error);
     res.status(500).json({ message: 'Error del servidor' });
   }
-}
+};
+
+export const registrationProduct = async (req, res) => {
+  try {
+    const product = req.body;
+    await registrationProductServices(product);
+  } catch (error) {
+    console.error('Error addProduct:', error);
+    res.status(500).json({ message: 'Error del servidor' });
+  }
+};

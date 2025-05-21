@@ -30,6 +30,14 @@ const customerSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  isGuest: {
+    type: Boolean,
+    default: true,
+  },
+  password: {
+    type: String,
+    trim: true,
+  },
   favorites: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product'
@@ -49,24 +57,6 @@ const customerSchema = new mongoose.Schema({
     },
     extra: String,
     comments: String
-  },
-  shipments: {
-    orderId: String,
-    carrier: String,
-    pickupAtCarrierOffice: Boolean,
-    status: String,
-    shippedDate: Date,
-    estimatedDelivery: Date,
-    deliveryAddress: {
-      street: String,
-      externalNumber: String,
-      internalNumber: String,
-      postalCode: String,
-      neighborhood: String,
-      city: String,
-      state: String,
-      aditionalReferents: String
-    }
   },
   schedule: {
     appointmentDate: Date,

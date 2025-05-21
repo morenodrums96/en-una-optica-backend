@@ -66,7 +66,7 @@ export const getGuestFavoriteServices = async (sessionId) => {
 
 }
 
-export const postMergeGuestFavoritesServices = async (sessionId, userId) => {
+export const getMergeGuestFavoritesServices = async (sessionId, userId) => {
     const guest = await AnonymousFavorite.findOne({ sessionId });
 
     if (!guest || !guest.favorites.length) {
@@ -87,3 +87,7 @@ export const postMergeGuestFavoritesServices = async (sessionId, userId) => {
 
     return customer; // opcional si quieres usarlo en el controller
 };
+
+export const registerCustomerServices = async (customerInfor) => {
+    Customer.create(customerInfor);
+}

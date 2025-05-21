@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllCustomers, getFavorites, postFavorites, postGuestFavorite, getGuestFavorite, postMergeGuestFavorites } from '../controllers/customer.controller.js';
+import { getAllCustomers, getFavorites, postFavorites, postGuestFavorite, getGuestFavorite, getMergeGuestFavorites,registerCustomer } from '../controllers/customer.controller.js';
 
 const router = express.Router();
 
@@ -9,6 +9,7 @@ router.get('/customers/:id/favorites', getFavorites); // Paginados
 router.post('/customers/:id/postFavorites', postFavorites);
 router.post('/customers/postGuestFavorite', postGuestFavorite);
 router.get('/customers/getGuestFavorite/:sessionId', getGuestFavorite);
-router.get('/customers/postMergeGuestFavorites', postMergeGuestFavorites);
+router.get('/customers/getMergeGuestFavorites', getMergeGuestFavorites);
+router.post('/customers/registerCustomer', registerCustomer);
 
 export default router;

@@ -15,15 +15,14 @@ const app = express();
 // automáticamente en un objeto JavaScript que pueda usar con req.body”)
 app.use(express.json());
 // Rutas (las conectaremos después)
-// app.use('/api', productRoutes);
-// app.use('/api', branchRoutes);
-// app.use('/api', employers);
 // app.use('/api', financialReport);
-// app.use('/api', orderRoutes);
 
 /*Entramos a la pagina y muestra el catalogoa de productos*/
 app.use('/api', productRoutes);
 app.use('/api', customers);
+app.use('/api', employers);
+app.use('/api', branchRoutes);
+app.use('/api', orderRoutes);
 
 
 

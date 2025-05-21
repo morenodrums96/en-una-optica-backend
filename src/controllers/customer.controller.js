@@ -1,6 +1,6 @@
 import {
     getAllCustomersService, getFavoritesService, postFavoritesService,
-    postGuestFavoriteServices, getGuestFavoriteServices, postMergeGuestFavoritesServices
+    postGuestFavoriteServices, getGuestFavoriteServices, getMergeGuestFavoritesServices, registerCustomerServices
 } from '../services/customer.service.js';
 
 export const getAllCustomers = async (req, res) => {
@@ -85,7 +85,7 @@ export const getGuestFavorite = async (req, res) => {
     }
 };
 
-export const postMergeGuestFavorites = async (req, res) => {
+export const getMergeGuestFavorites = async (req, res) => {
     const { sessionId, userId } = req.body;
 
     if (!sessionId || !userId) {
@@ -93,7 +93,7 @@ export const postMergeGuestFavorites = async (req, res) => {
     }
 
     try {
-        await postMergeGuestFavoritesServices(sessionId, userId);
+        await getMergeGuestFavoritesServices(sessionId, userId);
         res.json({ message: 'Favoritos fusionados con éxito' });
     } catch (error) {
         console.error('Error al fusionar favoritos:', error);
@@ -109,6 +109,16 @@ export const postMergeGuestFavorites = async (req, res) => {
         res.status(500).json({ message: 'Error del servidor' });
     }
 };
+
+export const registerCustomer = async (req, res) => {
+    try {
+        const customerInfor = req.body;
+        await registerCustomerServices(customerInfor);
+    } catch (error) {
+        console.error('Error en el registerCustomer:', error);
+        res.status(500).json({ message: 'Error del servidor' });
+    }
+}
 
 
 
