@@ -5,7 +5,7 @@ import { getAllProductsServices, getCatalogByFilterServices, getProductSelectedS
 export const getAllProducts = async (req, res) => {
   try {
     const products = await getAllProductsServices();
-    res.json(products);
+    res.json({ products });
   } catch (error) {
     console.error('Error al obtener productos:', error);
     res.status(500).json({ message: 'Error del servidor' });
@@ -51,7 +51,7 @@ export const getCatalogByFilter = async (req, res) => {
 
 export const getProductSelected = async (req, res) => {
   try {
-    const id = req.query.id || null;
+    const id = req.params.id;
     const product = await getProductSelectedServices(id);
     res.json({ product });
   } catch (error) {
@@ -63,7 +63,10 @@ export const getProductSelected = async (req, res) => {
 export const registrationProduct = async (req, res) => {
   try {
     const product = req.body;
-    await registrationProductServices(product);
+    const result = await registrationProductServices(product);
+    return res.status(201).json({
+      message: 'Producto registrado correctamente'
+    });
   } catch (error) {
     console.error('Error addProduct:', error);
     res.status(500).json({ message: 'Error del servidor' });

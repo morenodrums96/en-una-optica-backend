@@ -1,13 +1,6 @@
 import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
-  orderId: {
-    type: String,
-    required: true,
-    trim: true,
-    unique: true,
-  },
-
   customerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Customer', // asegúrate que coincida con .model('Customers')

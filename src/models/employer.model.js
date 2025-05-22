@@ -33,9 +33,9 @@ const employerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-   status: {
-    Boolean,
-    required: true,
+  status: {
+    type: Boolean,
+    required: true
   },
   branch: {
     type: String,

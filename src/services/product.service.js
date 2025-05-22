@@ -79,11 +79,11 @@ export const getProductSelectedServices = async (id = null) => {
         name: 1,
         brand: 1,
         customerPrice: 1,
-        variants: 1
-    });
+        variants: 1,
+    });//.populate('lensColor frameMaterial faceShape frameShape');
     return products;
 };
 
 export const registrationProductServices = async (product) => {
-    Product.create(product);
+    return await Product.create(product); // ✅ Retornar el producto creado
 }

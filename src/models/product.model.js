@@ -40,10 +40,6 @@ const productSchema = new mongoose.Schema({
     required: true,
     min: 0,
   },
-  purchaseDate: {
-    type: Date,
-    required: true,
-  },
   variants: [{
     color: {
       type: String,
@@ -57,8 +53,9 @@ const productSchema = new mongoose.Schema({
   }]
   ,
   lensColor: {
-    type: String,
-    trim: true
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Catalog',
+    required: true
   },
   customerPrice: {
     type: Number,
@@ -66,8 +63,9 @@ const productSchema = new mongoose.Schema({
     min: 0,
   },
   frameMaterial: {
-    type: String,
-    trim: true
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Catalog',
+    required: true
   },
   frond: {
     type: Boolean,
@@ -77,11 +75,13 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   }, faceShape: {
-    type: String,
-    trim: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Catalog',
+    required: true
   }, frameShape: {
-    type: String,
-    trim: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Catalog',
+    required: true
   },
   sales: {
     type: Number,

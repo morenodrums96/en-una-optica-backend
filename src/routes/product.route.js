@@ -6,9 +6,9 @@ import { getAllProducts, getCatalogByFilter, getProductSelected, registrationPro
 const router = express.Router();
 
 router.get('/products', getAllProducts);
-router.get('/products/byFilter', getCatalogByFilter); // Paginados
-router.get('/products/selected', getProductSelected); // Paginados
-router.post('/products/registration', registrationProduct); // Paginados
+router.get('/products/byFilter', getCatalogByFilter); 
+router.get('/products/selected/:id', getProductSelected); 
+router.post('/products/registration', registrationProduct); 
 
 
 export default router;
