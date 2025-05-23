@@ -3,18 +3,28 @@ import mongoose from "mongoose";
 const orderSchema = new mongoose.Schema({
   customerId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Customer', // asegúrate que coincida con .model('Customers')
-    required: true
+    ref: 'Customer',
+    required: false
+  },
+  sessionId: {
+    type: String,
+    required: false
   },
   guide: {
     type: String,
-    required: true,
     trim: true,
+    required: false
+
+  },
+  correo: {
+    type: String,
+    trim: true,
+    required: false
   },
   cellphone: {
     type: String,
-    required: true,
     trim: true,
+    required: false
   },
 
   products: [
@@ -31,20 +41,14 @@ const orderSchema = new mongoose.Schema({
       },
       unitPrice: {
         type: Number,
-        required: true,
         min: 0
       },
-      total: {
-        type: Number,
-        required: true,
-        min: 0
-      }
     }
   ],
 
   totalAmount: {
     type: Number,
-    required: true,
+    required: false,
     min: 0
   },
 
@@ -68,11 +72,14 @@ const orderSchema = new mongoose.Schema({
     default: 'pending',
     required: true
   },
-
+  orderIsSent: {
+    type: String,
+    enum: ['branch', 'house', 'usa'],
+    default: 'house',
+  },
   paymentMethod: {
     type: String,
     enum: ['card', 'oxxo', 'paypal', 'bank_transfer'],
-    default: 'card'
   },
 
   shippedDate: Date,

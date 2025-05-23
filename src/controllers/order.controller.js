@@ -1,26 +1,30 @@
-import { getAllOrderServices, generateOrderServices, orderPaginationServices } from '../services/order.service.js';
+import { getAllOrderServices, generateOrderServices, orderPaginationServices, completeOrderServices,removeProductFromOrderService } from '../services/order.service.js';
 
 export const getAllOrders = async (req, res) => {
-    try {
-        const orders = await getAllOrderServices();
-        res.json(orders);
-    } catch (error) {
-        console.error('Error al obtener ordenes:', error);
-        res.status(500).json({ message: 'Error del servidor' });
-    }
+  try {
+    const orders = await getAllOrderServices();
+    res.json(orders);
+  } catch (error) {
+    console.error('Error al obtener ordenes:', error);
+    res.status(500).json({ message: 'Error del servidor' });
+  }
 
 };
 
 export const generateOrder = async (req, res) => {
-    try {
-        const { orderInfor, addressInformation } = req.body;
-        await generateOrderServices(orderInfor, addressInformation);
-    } catch (error) {
-        console.error('Error al generar orden:', error);
-        res.status(500).json({ message: 'Error del servidor favor de mandar un mensaje.' });
-    }
+  try {
+    const order = await generateOrderServices(req.body);
 
+    res.status(201).json({
+      message: 'orden registrada correctamente',
+      order
+    });
+  } catch (error) {
+    console.error('Error en generateOrder:', error);
+    res.status(500).json({ message: 'Error del servidor. Favor de mandar un mensaje.' });
+  }
 };
+
 
 export const orderPagination = async (req, res) => {
   try {
@@ -37,7 +41,39 @@ export const orderPagination = async (req, res) => {
       totalPages: Math.ceil(total / limit)
     });
   } catch (error) {
-    console.error('Error en la paginación orderPagination:', error);
+    console.error('Error en el orderPagination:', error);
+    res.status(500).json({ message: 'Error del servidor' });
+  }
+};
+
+export const completeOrder = async (req, res) => {
+  try {
+    const updated = await completeOrderServices(req.body);
+    if (!updated) {
+      return res.status(404).json({ message: 'Orden no encontrada' });
+    }
+    res.status(201).json({ message: 'Orden completada correctamente' });
+  } catch (error) {
+    console.error('Error en el completeOrder:', error);
+    res.status(500).json({ message: 'Error del servidor' });
+  }
+};
+
+export const removeProductFromOrder = async (req, res) => {
+  try {
+    const { orderId, productIdInterno } = req.params;
+    const updatedOrder = await removeProductFromOrderService(orderId, productIdInterno);
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: 'Orden o producto no encontrados' });
+    }
+
+    res.json({
+      message: 'Producto eliminado correctamente de la orden',
+      order: updatedOrder
+    });
+  } catch (error) {
+    console.error('Error al eliminar producto de la orden:', error);
     res.status(500).json({ message: 'Error del servidor' });
   }
 };
