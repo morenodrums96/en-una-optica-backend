@@ -52,10 +52,10 @@ const productSchema = new mongoose.Schema({
     images: [String],
   }]
   ,
-  lensColor: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Catalog',
-    required: true
+  size: {
+    type: String,
+    enum: ['Angosto', 'Promedio', 'Ancho', 'Extra ancho'],
+    default: 'Promedio',
   },
   customerPrice: {
     type: Number,
@@ -83,6 +83,10 @@ const productSchema = new mongoose.Schema({
     ref: 'Catalog',
     required: true
   },
+  configurableOptions: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'ConfigurableOption'
+  }],
   sales: {
     type: Number,
     default: 0

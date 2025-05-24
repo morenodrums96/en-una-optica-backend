@@ -1,6 +1,6 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
-import app from '../app.js';
+import app from '../../app.js';
 
 describe('GET /api/products/selected', () => {
     beforeAll(async () => {
@@ -13,7 +13,7 @@ describe('GET /api/products/selected', () => {
 
     it('debe devolver un producto seleccionado', async () => {
         const response = await request(app)
-            .get('/api/products/selected/682e9a58fe6c17604d5f60d8');
+            .get('/api/products/selected/68314dd7954319d8ebc97b63');
 
         console.log(JSON.stringify(response.body, null, 2));
 

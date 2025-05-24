@@ -7,6 +7,7 @@ import employers from './routes/employer.route.js';
 import financialReport from './routes/financialReport.route.js';
 import orderRoutes from './routes/order.route.js';
 import catalogRoutes from './routes/catalogRoutes.route.js';
+import configurableOptionRoutes from './routes/configurableOption.route.js';
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use('/api', employers);
 app.use('/api', branchRoutes);
 app.use('/api', orderRoutes);
 app.use('/api', catalogRoutes);
+app.use('/api', configurableOptionRoutes);
 
 
 

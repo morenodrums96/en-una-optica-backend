@@ -80,7 +80,8 @@ export const getProductSelectedServices = async (id = null) => {
         brand: 1,
         customerPrice: 1,
         variants: 1,
-    });//.populate('lensColor frameMaterial faceShape frameShape');
+        configurableOptions:1
+    }).populate('configurableOptions');//.populate('lensColor frameMaterial faceShape frameShape');
     return products;
 };
 

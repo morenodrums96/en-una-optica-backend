@@ -1,7 +1,7 @@
 // src/tests/productRegistration.test.js
 import request from 'supertest';
 import mongoose from 'mongoose';
-import app from '../app.js';
+import app from '../../app.js';
 
 describe('POST /api/products/registration', () => {
     beforeAll(async () => {
@@ -41,6 +41,7 @@ describe('POST /api/products/registration', () => {
             iva: true,
             faceShape: "682e852bf0aaa3a211110d7e",
             frameShape: "682e852bf0aaa3a211110d81",
+            configurableOptions: ["68314d8ee22c426ff43ce5ee", "68314ca19db39f97f8476660"],
             sales: 3
 
         };
