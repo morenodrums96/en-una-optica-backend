@@ -16,9 +16,6 @@ describe('GET /api/products/selected', () => {
             .get('/api/products/selected/68314dd7954319d8ebc97b63');
 
         console.log(JSON.stringify(response.body, null, 2));
-
-        console.log(response.body.product.variants);
-
         expect(response.statusCode).toBe(200);
         expect(response.body).toHaveProperty('product');
         expect(typeof response.body.product).toBe('object');

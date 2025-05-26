@@ -38,6 +38,7 @@ describe('POST /api/products/registration', () => {
             customerPrice: 350,
             frameMaterial: "682e852bf0aaa3a211110d7b",
             frond: true,
+            canModifyQuantity: true,
             iva: true,
             faceShape: "682e852bf0aaa3a211110d7e",
             frameShape: "682e852bf0aaa3a211110d81",

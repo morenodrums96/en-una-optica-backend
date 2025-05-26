@@ -22,6 +22,10 @@ const customerSchema = new mongoose.Schema({
   birthDate: {
     type: Date,
   },
+  openpayCustomerId: {
+    type: String,
+    trim: true,
+  },
   email: {
     type: String,
     trim: true,

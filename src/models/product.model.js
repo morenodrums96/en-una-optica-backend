@@ -71,6 +71,10 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  canModifyQuantity: {
+    type: Boolean,
+    default: false,
+  },
   iva: {
     type: Boolean,
     default: false,

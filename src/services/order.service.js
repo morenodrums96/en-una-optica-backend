@@ -1,7 +1,6 @@
 import { Order } from "../models/order.model.js";
-import { Customer } from "../models/customer.model.js";
-import { Address } from "../models/address.model.js";
 import { Product } from '../models/product.model.js';
+import { ConfigurableOption } from '../models/configurableOption.model.js';
 
 
 export const getAllOrderServices = async () => {
@@ -9,28 +8,6 @@ export const getAllOrderServices = async () => {
   return orders;
 };
 
-// export const generateOrderServices = async (orderInfor, addressInformation) => {
-//     const customerEmail = orderInfor.email;
-//     let customeExists = await Customer.findOne({ email: customerEmail });
-
-//     if (!customeExists) {
-//         const information = {
-//             name: orderInfor.name,
-//             secondName: orderInfor.secondName,
-//             secondLastName: orderInfor.secondLastName,
-//             cellphone: orderInfor.cellphone,
-//             email: orderInfor.email,
-//             isGuest: true,
-//         };
-
-//         customeExists = await Customer.create(information);
-//     }
-//     addressInformation.customerId = customeExists._id;
-//     await Address.create(addressInformation);
-//     orderInfor.customerId = customeExists._id;
-//     await Order.create(orderInfor);
-
-// };
 
 
 export const generateOrderServices = async (orderInfo) => {
@@ -47,36 +24,99 @@ export const generateOrderServices = async (orderInfo) => {
   const realProducts = await Product.find({ _id: { $in: productIds } });
 
   let totalAmount = 0;
+  const enrichedProducts = [];
 
-  const enrichedProducts = products.map(p => {
+  for (const p of products) {
     const real = realProducts.find(rp => rp._id.toString() === p.productId.toString());
-    const unitPrice = real?.customerPrice || 0;
-    const lineTotal = unitPrice * p.quantity;
-    totalAmount += lineTotal;
+    const customerPriceFrond = real?.customerPrice || 0;
+    const quantity = p.quantity || 1;
+    const baseTotal = customerPriceFrond * quantity;
 
-    return {
+    const { enriched, subtotal } = await enrichConfigurableOptions(p.configurableOptions);
+
+    const totalByProduct = baseTotal + subtotal;
+    totalAmount += totalByProduct;
+
+    enrichedProducts.push({
       productId: p.productId,
-      quantity: p.quantity,
-      unitPrice
-    };
-  });
-
-  const roundedTotal = Math.round(totalAmount * 100) / 100;
+      quantity,
+      customerPriceFrond,
+      totalByProduct: Math.round(totalByProduct * 100) / 100,
+      configurableOptions: enriched
+    });
+  }
 
   if (order) {
     order.products.push(...enrichedProducts);
-    order.totalAmount = Math.round((order.totalAmount + totalAmount) * 100) / 100;
+    order.totalAmount += Math.round(totalAmount * 100) / 100;
     await order.save();
     return order;
   } else {
     const newOrder = await Order.create({
       ...orderInfo,
       products: enrichedProducts,
-      totalAmount: roundedTotal
+      totalAmount: Math.round(totalAmount * 100) / 100
     });
     return newOrder;
   }
 };
+
+
+export const enrichConfigurableOptions = async (configSelections = []) => {
+  const enriched = [];
+  let subtotal = 0;
+
+  for (const selection of configSelections) {
+    const group = await ConfigurableOption.findById(selection.groupId);
+    if (!group || !group.enabled) continue;
+
+    const enrichedGroup = {
+      groupName: group.group,
+      options: []
+    };
+
+    for (const optId of selection.optionIds) {
+      const option = group.options.find(o => o._id.toString() === optId);
+      if (!option || !option.enabled) continue;
+
+      subtotal += option.price;
+
+      const enrichedOption = {
+        name: option.name,
+        price: option.price,
+        colors: []
+      };
+
+      const colorsForOption = selection.selectedColors?.filter(
+        sc => sc.optionId === optId
+      ) || [];
+
+      for (const colorSel of colorsForOption) {
+        const matchedColor = option.availableColors.find(
+          c => c._id.toString() === colorSel.colorId
+        );
+        if (matchedColor && matchedColor.enabled) {
+          enrichedOption.colors.push({
+            name: matchedColor.name,
+            hex: matchedColor.hex
+          });
+        }
+      }
+
+      enrichedGroup.options.push(enrichedOption);
+    }
+
+    if (enrichedGroup.options.length > 0) {
+      enriched.push(enrichedGroup);
+    }
+  }
+
+  return { enriched, subtotal };
+};
+
+
+
+
 
 
 
@@ -90,14 +130,14 @@ export const orderPaginationServices = async (page = 1, limit = 12, status) => {
     query.orderStatus = status;
   }
 
-  const result = await Order.find(query)
+  const order = await Order.find(query)
     .sort({ createdAt: -1 }) // más recientes primero
     .skip(skip)
     .limit(limit);
 
   const total = await Order.countDocuments(query);
 
-  return { result, total };
+  return { order, total };
 };
 
 export const completeOrderServices = async ({ customerId, sessionId, ...data }) => {
@@ -115,7 +155,7 @@ export const completeOrderServices = async ({ customerId, sessionId, ...data }) 
     filter,
     { $set: data },
     { new: true }
-  );
+  ).select('_id totalAmount');
 
   return updatedOrder;
 };
@@ -137,7 +177,61 @@ export const removeProductFromOrderService = async (orderId, productIdInterno) =
   return order;
 };
 
-//pendientes cuando le den en graduar configurar todo y que se agregue en la orden // it('carrito de compra por session', async () => {
-  //Despues en esa pantalla que puedan aumentar o disminuir la cantidad de lentes si no estan graduados o no tienen configuraciones las cuales tenga aumento valla si tiene aumento que no se pueda subir o bajar la cantidad
-  // si no tiene aumento que si y que ahi mismo agreguen toda la informacion no te la compliques para que se genere toda la orden completa y cuando le den enviar ya solo sea la tarjeta y el backen haga los camculos con el backend
-  //Agregar candado para que el frond no pueda mandar un campo de monto o algo asi y planchen el monto que calculamos
+export const getbyClientServices = async ({ sessionId, customerId }) => {
+  const filter = {
+    orderStatus: 'pending',
+    ...(customerId ? { customerId } : { sessionId })
+  };
+
+  const order = await Order.find(filter).populate('products.productId', 'name brand image customerPrice variants.image canModifyQuantity');
+  return order;
+};
+
+
+export const updateQuantityOrderService = async ({ customerId, sessionId, products }) => {
+  const filter = {
+    orderStatus: 'pending',
+    ...(customerId ? { customerId } : { sessionId })
+  };
+
+  const order = await Order.findOne(filter);
+  if (!order) throw new Error('Orden no encontrada');
+
+  let totalAmount = 0;
+  const updatedProducts = [];
+
+  for (const item of products) {
+    const existingProduct = order.products.id(item.products_id);
+    if (!existingProduct) continue;
+
+    const quantity = item.quantity || 1;
+    const basePrice = existingProduct.customerPriceFrond || 0;
+
+    // Sumar configuraciones
+    let configPrice = 0;
+
+    for (const group of existingProduct.configurableOptions || []) {
+      for (const opt of group.options || []) {
+        configPrice += opt.price || 0;
+      }
+    }
+
+    // Total por producto considerando cantidad y configuraciones
+    const totalByProduct = (basePrice + configPrice) * quantity;
+    totalAmount += totalByProduct;
+
+    // Guardar actualizaciones
+    existingProduct.quantity = quantity;
+    existingProduct.totalByProduct = Math.round(totalByProduct * 100) / 100;
+
+    updatedProducts.push(existingProduct);
+  }
+
+  // Reemplazar productos actualizados y guardar el nuevo total general
+  order.products = updatedProducts;
+  order.totalAmount = Math.round(totalAmount * 100) / 100;
+
+  await order.save();
+  return order;
+};
+

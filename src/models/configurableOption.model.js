@@ -12,10 +12,6 @@ const colorSchema = new mongoose.Schema({
   enabled: {
     type: Boolean,
     default: false
-  },
-  selected: {
-    type: Boolean,
-    default: false
   }
 });
 const optionSchema = new mongoose.Schema({
@@ -34,9 +30,9 @@ const optionSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  selected: {
+  activeQuantity: {
     type: Boolean,
-    default: false
+    default: false,
   },
   availableColors: [colorSchema]
 

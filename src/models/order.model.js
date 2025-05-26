@@ -26,7 +26,6 @@ const orderSchema = new mongoose.Schema({
     trim: true,
     required: false
   },
-
   products: [
     {
       productId: {
@@ -39,10 +38,31 @@ const orderSchema = new mongoose.Schema({
         required: true,
         min: 1
       },
-      unitPrice: {
+      totalByProduct: {
         type: Number,
         min: 0
       },
+      customerPriceFrond: {
+        type: Number,
+        min: 0
+      },
+      configurableOptions: [
+        {
+          groupName: String,
+          options: [
+            {
+              name: String,
+              price: Number,
+              colors: [
+                {
+                  name: String,
+                  hex: String
+                }
+              ]
+            }
+          ]
+        }
+      ],
     }
   ],
 
@@ -81,6 +101,11 @@ const orderSchema = new mongoose.Schema({
     type: String,
     enum: ['card', 'oxxo', 'paypal', 'bank_transfer'],
   },
+  paymentIntentId: {
+    type: String,
+    trim: true
+  },
+
 
   shippedDate: Date,
   estimatedDelivery: Date,
