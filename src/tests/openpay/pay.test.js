@@ -18,7 +18,7 @@ describe('POST /api/openpay/customers', () => {
         customerId: '682d6e872b2dc1c506b84140'
       });
 
-    console.log('🔐 Response:', response.body);
+    console.log('Response', JSON.stringify(response.body, null, 2));
 
     expect(response.statusCode).toBe(201);
     expect(response.body).toHaveProperty('message', 'Cliente creado en OpenPay');

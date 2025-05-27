@@ -113,7 +113,23 @@ const orderSchema = new mongoose.Schema({
   date: {
     type: Date,
     default: Date.now
-  }
+  },
+  logs: [
+    {
+      action: String,
+      message: String,
+      metadata: Object,
+      performedBy: {
+        type: String,
+        enum: ['system', 'customer', 'admin'],
+        default: 'system'
+      },
+      timestamp: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ]
 
 }, {
   timestamps: true

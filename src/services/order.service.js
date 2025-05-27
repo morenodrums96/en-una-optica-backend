@@ -9,7 +9,6 @@ export const getAllOrderServices = async () => {
 };
 
 
-
 export const generateOrderServices = async (orderInfo) => {
   const { sessionId, customerId, products } = orderInfo;
 
@@ -55,10 +54,32 @@ export const generateOrderServices = async (orderInfo) => {
     const newOrder = await Order.create({
       ...orderInfo,
       products: enrichedProducts,
-      totalAmount: Math.round(totalAmount * 100) / 100
+      totalAmount: Math.round(totalAmount * 100) / 100,
+      logs: []
     });
+
+    addOrderLog(newOrder, {
+      action: 'created',
+      message: 'Orden creada desde carrito de compras',
+      metadata: {
+        source: customerId ? 'customer' : 'guest',
+        totalAmount: Math.round(totalAmount * 100) / 100
+      }
+    });
+
+    await newOrder.save();
     return newOrder;
   }
+};
+
+export const addOrderLog = (order, { action, message, metadata = {}, performedBy = 'system' }) => {
+  order.logs.push({
+    action,
+    message,
+    metadata,
+    performedBy,
+    timestamp: new Date()
+  });
 };
 
 
