@@ -9,6 +9,7 @@ import orderRoutes from './routes/order.route.js';
 import catalogRoutes from './routes/catalogRoutes.route.js';
 import configurableOptionRoutes from './routes/configurableOption.route.js';
 import openPay from './routes/openPay.route.js';
+import skydropxRoutes from './routes/skydropx.route.js';
 
 const app = express();
 app.use(express.json());
@@ -22,6 +23,7 @@ app.use('/api', orderRoutes);
 app.use('/api', catalogRoutes);
 app.use('/api', configurableOptionRoutes);
 app.use('/api', openPay);
+app.use('/api', skydropxRoutes);
 
 
 export default app;
