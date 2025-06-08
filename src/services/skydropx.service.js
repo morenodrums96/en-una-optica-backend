@@ -28,7 +28,7 @@ export const getSkydropxTokenService = async () => {
 
 export const getSkydropxQuoteService = async (quotationData) => {
   try {
-    const token = await getSkydropxTokenService();
+    const token = 'IB75Ah_4tlpm-AW4FmJXy25TnNpPVxWLd5Vnn7QZrvk';//await getSkydropxTokenService();
 
     const response = await axios.post(
       'https://sb-pro.skydropx.com/api/v1/quotations',
@@ -45,5 +45,26 @@ export const getSkydropxQuoteService = async (quotationData) => {
   } catch (error) {
     console.error('❌ Error cotizando en SkydropX:', error.response?.data || error.message);
     throw new Error('No se pudo obtener la cotización de envío');
+  }
+};
+
+export const getSkydropxQuotationByIdService = async (quotationId) => {
+  try {
+    const token = 'IB75Ah_4tlpm-AW4FmJXy25TnNpPVxWLd5Vnn7QZrvk';//await getSkydropxTokenService();
+
+    const response = await axios.get(
+      `https://sb-pro.skydropx.com/api/v1/quotations/${quotationId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error en servicio Skydropx GET Quotation:', error.response?.data || error.message);
+    throw new Error('No se pudo obtener la cotización');
   }
 };
