@@ -51,7 +51,7 @@ export const getSkydropxQuoteService = async (quotationData) => {
 
 export const getSkydropxQuotationByIdService = async (quotationId, orderId) => {
   try {
-    const token = 'Jz6vWXU4BvLCZtnPZWGuJlv99TUb1C5v1rBefzFF8ek';//await getSkydropxTokenService();
+    const token = await getSkydropxTokenService();
 
     const response = await axios.get(
       `https://sb-pro.skydropx.com/api/v1/quotations/${quotationId}`,

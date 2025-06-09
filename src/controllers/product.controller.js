@@ -62,13 +62,25 @@ export const getProductSelected = async (req, res) => {
 
 export const registrationProduct = async (req, res) => {
   try {
-    const product = req.body;
+    const product = JSON.parse(req.body.product); 
+
+    const uploadedImages = req.files.map(file => file.location);
+
+    // Aquí puedes decidir cómo usarlas. Por ejemplo, agregar a una sola variante:
+    if (product.variants && product.variants.length > 0) {
+      product.variants[0].images = uploadedImages;
+      product.variants[0].image = uploadedImages[0] || ''; // imagen principal
+    }
+
     const result = await registrationProductServices(product);
+
     return res.status(201).json({
-      message: 'Producto registrado correctamente'
+      message: 'Producto registrado correctamente',
+      product: result
     });
   } catch (error) {
     console.error('Error addProduct:', error);
     res.status(500).json({ message: 'Error del servidor' });
   }
 };
+
