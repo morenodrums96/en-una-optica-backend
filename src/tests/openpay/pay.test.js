@@ -33,3 +33,4 @@ describe('POST /api/openpay/customers', () => {
 // customer pero si limpia cache se borra la informacion y ahi queda en la BD.Una ves esto procedemos a ejecutar el siguiente api el cual es para realizar cobro 
 // guardar estatus y de mas en la BD de pendieng a pagado y cobrar el total. despues ver lo de Aplazo y 
 // despues ver lo de DHL o Stafeta 
+

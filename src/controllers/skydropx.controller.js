@@ -1,4 +1,4 @@
-import { getSkydropxTokenService,getSkydropxQuoteService,getSkydropxQuotationByIdService } from '../services/skydropx.service.js';
+import { getSkydropxTokenService, getSkydropxQuoteService, getSkydropxQuotationByIdService } from '../services/skydropx.service.js';
 
 export const getToken = async (req, res) => {
   try {
@@ -22,7 +22,8 @@ export const getQuotation = async (req, res) => {
 export const getQuotationById = async (req, res) => {
   try {
     const { id } = req.params;
-    const data = await getSkydropxQuotationByIdService(id);
+    const { orderId } = req.query; 
+    const data = await getSkydropxQuotationByIdService(id,orderId);
     res.status(200).json(data);
   } catch (error) {
     console.error('❌ Error obteniendo cotización por ID:', error.message);

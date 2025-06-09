@@ -20,7 +20,7 @@ describe('POST /api/skydropx/quote', () => {
             },
             parcel: {
                 length: "20",
-                width: "15",
+                width: "10",
                 height: "10",
                 weight: "1.0"
             },
