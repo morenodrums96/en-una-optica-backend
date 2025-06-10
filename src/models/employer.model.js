@@ -28,7 +28,12 @@ const employerSchema = new mongoose.Schema({
   companyEmail: {
     type: String,
     trim: true,
+    required: true,
+    unique: true, // <- importante si no quieres duplicados
+    lowercase: true,
+    match: [/^\S+@\S+\.\S+$/, 'Correo inválido']
   },
+
   passwordHash: {
     type: String,
     required: true,
@@ -36,6 +41,11 @@ const employerSchema = new mongoose.Schema({
   status: {
     type: Boolean,
     required: true
+  },
+  rol: {
+    type: String,
+    required: true,
+    trim: true,
   },
   branch: {
     type: String,

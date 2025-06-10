@@ -10,11 +10,14 @@ import catalogRoutes from './routes/catalogRoutes.route.js';
 import configurableOptionRoutes from './routes/configurableOption.route.js';
 import openPay from './routes/openPay.route.js';
 import skydropxRoutes from './routes/skydropx.route.js';
+import cors from "cors";
 
 const app = express();
 app.use(express.json());
-// app.use('/api', financialReport);
-
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true
+}));
 app.use('/api', productRoutes);
 app.use('/api', customers);
 app.use('/api', employers);

@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/products', getAllProducts);
 router.get('/products/byFilter', getCatalogByFilter); 
 router.get('/products/selected/:id', getProductSelected); 
-router.post('/products/registration', upload.array('images'), registrationProduct);
+router.post('/products/registration', registrationProduct);
 
 
 export default router;

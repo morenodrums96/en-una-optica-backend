@@ -1,4 +1,4 @@
-import { getAllEmployersService, postEmployeeRegistrationService, employeeUpdateServices, employeeByIdServices, employersPaginationServices } from "../services/employer.service.js";
+import { getAllEmployersService, postEmployeeRegistrationService, employeeUpdateServices, employeeByIdServices, employersPaginationServices,employeeLoginService } from "../services/employer.service.js";
 
 export const getAllEmployers = async (req, res) => {
   try {
@@ -72,5 +72,16 @@ export const employersPagination = async (req, res) => {
   } catch (error) {
     console.error('Error al buscar empleados:', error);
     res.status(500).json({ message: 'Error del servidor' });
+  }
+};
+
+export const employeeLogin = async (req, res) => {
+  try {
+    const { companyEmail, password } = req.body;
+    const result = await employeeLoginService(companyEmail, password);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Error al logear el empleados:', error);
+    res.status(500).json({ message: 'Error en el login' });
   }
 };
