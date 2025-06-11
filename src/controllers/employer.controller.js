@@ -1,4 +1,9 @@
 import { getAllEmployersService, postEmployeeRegistrationService, employeeUpdateServices, employeeByIdServices, employersPaginationServices,employeeLoginService } from "../services/employer.service.js";
+import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
+
+
+dotenv.config();
 
 export const getAllEmployers = async (req, res) => {
   try {
@@ -78,10 +83,33 @@ export const employersPagination = async (req, res) => {
 export const employeeLogin = async (req, res) => {
   try {
     const { companyEmail, password } = req.body;
-    const result = await employeeLoginService(companyEmail, password);
-    res.status(200).json(result);
+    const empleado = await employeeLoginService(companyEmail, password);
+
+    const token = jwt.sign(
+      { id: empleado._id, email: empleado.companyEmail, rol: empleado.rol },
+      process.env.JWT_SECRET,
+      { expiresIn: '2h' }
+    );
+
+    // Establecer cookie HTTP-only
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // true en producción (HTTPS)
+      sameSite: 'Lax',
+      maxAge: 2 * 60 * 60 * 1000, // 2 horas
+    });
+
+    res.status(200).json({
+      message: 'Inicio de sesión exitoso',
+      empleado: {
+        id: empleado._id,
+        nombre: empleado.name,
+        email: empleado.companyEmail,
+        rol: empleado.rol,
+      }
+    });
   } catch (error) {
     console.error('Error al logear el empleados:', error);
-    res.status(500).json({ message: 'Error en el login' });
+    res.status(401).json({ message: error.message || 'Error al iniciar sesión' });
   }
 };

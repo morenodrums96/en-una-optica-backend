@@ -4,8 +4,8 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug Test: selectedd.test.js",
-      "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+      "name": "Debug App",
+      "program": "${workspaceFolder}/src/server.js",
       "args": [
         "--runInBand",
         "tests/skyDropx/cotizacionGet.test.js"

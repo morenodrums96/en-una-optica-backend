@@ -8,5 +8,16 @@ router.post('/employeeUpdate', employeeUpdate);
 router.get('/employeeById/:id', employeeById);
 router.get('/employers/pagination', employersPagination);
 router.post('/secure/entrada-de-control-personal', employeeLogin);
+router.get('/secure/mi-perfil', (req, res) => {
+  const token = req.cookies.token
+  if (!token) return res.status(401).json({ message: 'No autenticado' })
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    res.status(200).json({ usuario: decoded })
+  } catch (err) {
+    res.status(401).json({ message: 'Token inválido' })
+  }
+})
 
 export default router;

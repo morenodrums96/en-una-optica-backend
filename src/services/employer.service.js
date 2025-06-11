@@ -1,6 +1,6 @@
 import { Employer } from '../models/employer.model.js';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+
 
 export const getAllEmployersService = async () => {
   const employers = await Employer.find();
@@ -64,20 +64,9 @@ export const employersPaginationServices = async (page = 1, limit = 12, filters 
 export const employeeLoginService = async (companyEmail, password) => {
   const empleado = await Employer.findOne({ companyEmail });
   if (!empleado) throw new Error("Correo no encontrado");
-const passwordValida = await bcrypt.compare(password, empleado.passwordHash);
+
+  const passwordValida = await bcrypt.compare(password, empleado.passwordHash);
   if (!passwordValida) throw new Error("Contraseña incorrecta");
-  const token = jwt.sign(
-    { id: empleado._id, email: empleado.companyEmail, rol: empleado.rol },
-    process.env.JWT_SECRET,
-    { expiresIn: "2h" }
-  );
-  return {
-    token,
-    empleado: {
-      id: empleado._id,
-      nombre: empleado.nombre,
-      email: empleado.companyEmail,
-      rol: empleado.rol,
-    },
-  };
+
+  return empleado;
 };
