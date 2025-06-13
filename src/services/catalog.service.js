@@ -12,7 +12,7 @@ export const catalogRegisterServices = async (catalogRegis) => {
   });
 
   if (exists) {
-    const error = new Error('Ya existe un registro con ese label en este grupo');
+    const error = new Error('Ya existe un registro en este grupo');
     error.code = 409;
     throw error;
   }

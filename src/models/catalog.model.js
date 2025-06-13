@@ -5,7 +5,7 @@ const catalogSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    enum: ['lensColor', 'frameMaterial', 'faceShape', 'frameShape'] 
+    enum: ['lensColor', 'frameMaterial', 'faceShape', 'frameShape','color'] 
   },
   label: {
     type: String,

@@ -42,7 +42,8 @@ const productSchema = new mongoose.Schema({
   },
   variants: [{
     color: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Catalog',
       required: true
     },
     image: {

@@ -5,7 +5,7 @@ export const catalogRegister = async (req, res) => {
   try {
     const catalogRegis = req.body;
     await catalogRegisterServices(catalogRegis);
-    res.status(201).json({ message: 'nuevo registro en el catalogo registrado correctamente' });
+    res.status(201).json({ message: 'Registro agregado con éxito.' });
   } catch (error) {
     console.log('Error en el catalogRegister:' + error.message);
 
