@@ -1,4 +1,4 @@
-import { catalogRegisterServices ,getGroupsServices} from '../services/catalog.service.js';
+import { catalogRegisterServices ,getGroupsServices,updateCatalogEntryServices,updateCatalogActiveStatusService} from '../services/catalog.service.js';
 
 
 export const catalogRegister = async (req, res) => {
@@ -43,4 +43,39 @@ export const getGroups = async (req, res) => {
     res.status(500).json({ message: 'Error del servidor' });
   }
 };
+
+export const updateCatalogEntry = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { label } = req.body;
+
+    await updateCatalogEntryServices(id, label);
+
+    res.status(200).json({ message: 'Registro actualizado con éxito' });
+  } catch (error) {
+    console.error('Error en updateCatalogEntry:', error.message);
+    const status = error.code === 409 ? 409 : 500;
+    res.status(status).json({ message: error.message || 'Error en el servidor' });
+  }
+};
+
+export const updateCatalogActiveStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { active } = req.body;
+
+    await updateCatalogActiveStatusService(id, active);
+
+    res.status(200).json({
+      message: `Registro ${active ? 'desactivado' : 'activado'} con éxito`
+    });
+  } catch (error) {
+    console.error('Error en updateCatalogActiveStatus:', error.message);
+    const status = error.code === 409 ? 409 : 500;
+    res.status(status).json({
+      message: error.message || 'Error en el servidor'
+    });
+  }
+};
+
 

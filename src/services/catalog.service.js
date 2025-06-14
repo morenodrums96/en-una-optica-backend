@@ -22,10 +22,41 @@ export const catalogRegisterServices = async (catalogRegis) => {
 };
 
 export const getGroupsServices = async (groups) => {
-   const catalogs = await Catalog.find({
-      group: { $in: groups },
-      active: true
-    }).sort({ group: 1, label: 1 });
+  const catalogs = await Catalog.find({
+    group: { $in: groups },
+  }).sort({ group: 1, label: 1 });
 
-    return catalogs
+  return catalogs
+};
+
+export const updateCatalogEntryServices = async (id, label) => {
+  // Primero verificar si existe
+  const existingCatalog = await Catalog.findById(id);
+
+  if (!existingCatalog) {
+    const error = new Error('El producto a modificar no existe');
+    error.code = 404;
+    throw error;
+  }
+
+  // Luego actualiza
+  const updated = await Catalog.findByIdAndUpdate(
+    id,
+    { label },
+    { new: true }
+  );
+
+  return updated;
+};
+
+export const updateCatalogActiveStatusService = async (id, newStatus) => {
+  const existingCatalog = await Catalog.findById(id);
+
+  if (!existingCatalog) {
+    const error = new Error('El registro no existe');
+    error.code = 404;
+    throw error;
+  }
+
+  await Catalog.findByIdAndUpdate(id, { active: newStatus });
 };

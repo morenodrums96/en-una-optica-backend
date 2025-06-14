@@ -1,9 +1,11 @@
 import express from "express";
-import { catalogRegister,getGroups } from '../controllers/catalog.controller.js';
+import { catalogRegister,getGroups,updateCatalogEntry,updateCatalogActiveStatus } from '../controllers/catalog.controller.js';
 const router = express.Router();
 
 
 router.post('/catalog/registration', catalogRegister);
 router.get('/catalogs', getGroups); 
+router.patch('/catalogs/:id', updateCatalogEntry);
+router.patch('/catalogs/:id/status', updateCatalogActiveStatus);
 
 export default router;
