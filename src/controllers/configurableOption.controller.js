@@ -3,9 +3,8 @@ import { createConfigurableOptionService, chageConfigurableOptionService, search
 export const createConfigurableOption = async (req, res) => {
   try {
     await createConfigurableOptionService(req.body);
-    res.status(201).json({
-      message: 'Grupo de opciones creado correctamente'
-    });
+    res.status(201).json({ message: 'Registro agregado con éxito.' });
+
   } catch (error) {
     console.error('❌ Error al crear grupo de opciones:', error);
     res.status(500).json({ message: 'Error del servidor' });

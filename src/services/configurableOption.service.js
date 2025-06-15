@@ -30,7 +30,7 @@ export const searchConfigurableOptionChageService = async (filters = {}) => {
     return result ? [result] : [];
   }
 
-  const results = await ConfigurableOption.find({ enabled: true }).select(projection);
+  const results = await ConfigurableOption.find({ }).select(projection);
   return results;
 };
 

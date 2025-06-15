@@ -20,7 +20,11 @@ const optionSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  description: String,
+  description: {
+    type: String,
+    required: true,
+    trim: true
+  },
   price: {
     type: Number,
     required: true,

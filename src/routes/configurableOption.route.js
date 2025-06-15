@@ -4,7 +4,7 @@ import { createConfigurableOption,chageConfigurableOption,searchConfigurableOpti
 const router = express.Router();
 
 router.post('/configurable-options', createConfigurableOption);
-router.post('/configurable-options/change', chageConfigurableOption);
+router.patch('/configurable-options/change', chageConfigurableOption);
 router.get('/configurable-options/search', searchConfigurableOptionChage);
 router.delete('/configurable-options/delete/:id', deleteConfigurableOptionChage);
 
