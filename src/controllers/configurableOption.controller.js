@@ -34,7 +34,7 @@ export const searchConfigurableOptionChage = async (req, res) => {
   try {
     const result = await searchConfigurableOptionChageService(req.query);
 
-    res.status(200).json({ result });
+    res.status(200).json(result)
   } catch (error) {
     console.error('❌ Error al buscar grupo:', error);
     res.status(500).json({ message: 'Error del servidor' });

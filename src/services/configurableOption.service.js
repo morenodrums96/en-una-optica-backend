@@ -19,21 +19,21 @@ export const chageConfigurableOptionService = async (optionData) => {
 
 
 export const searchConfigurableOptionChageService = async (filters = {}) => {
+  const projection = '_id group groupDescription allowMultiple enabled'
+
   if (filters._id) {
-    // Validación básica de ObjectId
     if (!mongoose.Types.ObjectId.isValid(filters._id)) {
-      return null; // o podrías lanzar un error si lo prefieres
+      return [];
     }
 
-    // Buscar solo uno
-    const result = await ConfigurableOption.findById(filters._id);
-    return result ? [result] : []; // devolvemos array para mantener formato uniforme
+    const result = await ConfigurableOption.findById(filters._id).select(projection);
+    return result ? [result] : [];
   }
 
-  // Si no hay _id, busca todos los habilitados
-  const results = await ConfigurableOption.find({ enabled: true });
+  const results = await ConfigurableOption.find({ enabled: true }).select(projection);
   return results;
 };
+
 
 
 export const deleteConfigurableOptionChageService = async (id) => {
