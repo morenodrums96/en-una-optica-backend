@@ -60,3 +60,10 @@ export const updateCatalogActiveStatusService = async (id, newStatus) => {
 
   await Catalog.findByIdAndUpdate(id, { active: newStatus });
 };
+
+
+
+export const getAllGroupsServices = () => {
+  return Catalog.find({ active: true });
+};
+

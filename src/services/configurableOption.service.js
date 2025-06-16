@@ -43,3 +43,25 @@ export const deleteConfigurableOptionChageService = async (id) => {
 
   await ConfigurableOption.findByIdAndDelete(id);
 };
+
+
+export const searchConfigurableOptionChageByIdService = async (filters = {}) => {
+  const projection = '_id group groupDescription allowMultiple enabled'
+
+  if (filters._id) {
+    if (!mongoose.Types.ObjectId.isValid(filters._id)) {
+      return [];
+    }
+
+    const result = await ConfigurableOption.findById(filters._id).select(projection);
+    return result ? [result] : [];
+  }
+
+  const results = await ConfigurableOption.find({ }).select(projection);
+  return results;
+};
+
+
+export const searchConfigurableActiveOptionChageService = async () => {
+  return await ConfigurableOption.find({ enabled: true });
+}; 

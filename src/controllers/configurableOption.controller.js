@@ -1,4 +1,7 @@
-import { createConfigurableOptionService, chageConfigurableOptionService, searchConfigurableOptionChageService, deleteConfigurableOptionChageService } from '../services/configurableOption.service.js';
+import {
+  createConfigurableOptionService, chageConfigurableOptionService, searchConfigurableOptionChageService,
+  deleteConfigurableOptionChageService, searchConfigurableOptionChageByIdService, searchConfigurableActiveOptionChageService
+} from '../services/configurableOption.service.js';
 
 export const createConfigurableOption = async (req, res) => {
   try {
@@ -19,7 +22,7 @@ export const chageConfigurableOption = async (req, res) => {
       return res.status(404).json({ message: 'Grupo no encontrado' });
     }
 
-    res.status(201).json({
+    res.status(200).json({
       message: 'Grupo de opciones actualizado correctamente'
     });
   } catch (error) {
@@ -52,6 +55,32 @@ export const deleteConfigurableOptionChage = async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Error al eliminar el grupo:', error);
+    res.status(500).json({ message: 'Error del servidor' });
+  }
+};
+
+
+export const searchConfigurableOptionChageById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await searchConfigurableOptionChageByIdService(id);
+
+    res.status(200).json(result)
+  } catch (error) {
+    console.error('❌ Error al eliminar el grupo:', error);
+    res.status(500).json({ message: 'Error del servidor' });
+  }
+};
+
+
+
+export const searchConfigurableActiveOptionChage = async (req, res) => {
+  try {
+    const result = await searchConfigurableActiveOptionChageService();
+    res.status(200).json(result)
+  } catch (error) {
+    console.error('❌ Error searchConfigurableActiveOptionChage', error);
     res.status(500).json({ message: 'Error del servidor' });
   }
 };

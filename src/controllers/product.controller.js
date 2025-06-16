@@ -62,14 +62,12 @@ export const getProductSelected = async (req, res) => {
 
 export const registrationProduct = async (req, res) => {
   try {
-    const product = JSON.parse(req.body.product); 
+    const product = req.body; // ✅ CAMBIO
 
-    const uploadedImages = req.files.map(file => file.location);
-
-    // Aquí puedes decidir cómo usarlas. Por ejemplo, agregar a una sola variante:
-    if (product.variants && product.variants.length > 0) {
+    if (req.files && req.files.length > 0 && product.variants?.length > 0) {
+      const uploadedImages = req.files.map(file => file.location);
       product.variants[0].images = uploadedImages;
-      product.variants[0].image = uploadedImages[0] || ''; // imagen principal
+      product.variants[0].image = uploadedImages[0] || '';
     }
 
     const result = await registrationProductServices(product);
@@ -83,4 +81,5 @@ export const registrationProduct = async (req, res) => {
     res.status(500).json({ message: 'Error del servidor' });
   }
 };
+
 

@@ -1,4 +1,4 @@
-import { catalogRegisterServices ,getGroupsServices,updateCatalogEntryServices,updateCatalogActiveStatusService} from '../services/catalog.service.js';
+import { catalogRegisterServices ,getGroupsServices,updateCatalogEntryServices,updateCatalogActiveStatusService,getAllGroupsServices} from '../services/catalog.service.js';
 
 
 export const catalogRegister = async (req, res) => {
@@ -79,3 +79,13 @@ export const updateCatalogActiveStatus = async (req, res) => {
 };
 
 
+export const getAllGroups = async (req, res) => {
+  try {
+    const result = await getAllGroupsServices();
+    res.status(200).json(result);
+
+  } catch (error) {
+    console.error('Error getGroups :', error);
+    res.status(500).json({ message: 'Error del servidor' });
+  }
+};

@@ -35,16 +35,17 @@ const productSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  quantity: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
+
   variants: [{
     color: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Catalog',
       required: true
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: 0,
     },
     image: {
       type: String,
