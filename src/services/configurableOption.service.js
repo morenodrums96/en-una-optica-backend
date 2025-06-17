@@ -30,7 +30,7 @@ export const searchConfigurableOptionChageService = async (filters = {}) => {
     return result ? [result] : [];
   }
 
-  const results = await ConfigurableOption.find({ }).select(projection);
+  const results = await ConfigurableOption.find({}).select(projection);
   return results;
 };
 
@@ -45,23 +45,26 @@ export const deleteConfigurableOptionChageService = async (id) => {
 };
 
 
-export const searchConfigurableOptionChageByIdService = async (filters = {}) => {
-  const projection = '_id group groupDescription allowMultiple enabled'
+export const searchConfigurableOptionChageByIdService = async (id) => {
+  const result = await ConfigurableOption.findById(id);
 
-  if (filters._id) {
-    if (!mongoose.Types.ObjectId.isValid(filters._id)) {
-      return [];
-    }
-
-    const result = await ConfigurableOption.findById(filters._id).select(projection);
-    return result ? [result] : [];
-  }
-
-  const results = await ConfigurableOption.find({ }).select(projection);
-  return results;
+  return result;
 };
 
 
 export const searchConfigurableActiveOptionChageService = async () => {
   return await ConfigurableOption.find({ enabled: true });
-}; 
+};
+
+
+
+export const updateConfigurableOptionService = async (optionData) => {
+  const { _id, ...updateData } = optionData;
+
+  const updated = await ConfigurableOption.findByIdAndUpdate(
+    _id,
+    { $set: updateData }
+  );
+
+  return updated;
+};

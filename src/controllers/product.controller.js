@@ -64,12 +64,6 @@ export const registrationProduct = async (req, res) => {
   try {
     const product = req.body; // ✅ CAMBIO
 
-    if (req.files && req.files.length > 0 && product.variants?.length > 0) {
-      const uploadedImages = req.files.map(file => file.location);
-      product.variants[0].images = uploadedImages;
-      product.variants[0].image = uploadedImages[0] || '';
-    }
-
     const result = await registrationProductServices(product);
 
     return res.status(201).json({

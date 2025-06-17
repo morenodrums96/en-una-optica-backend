@@ -13,7 +13,7 @@ import catalogRoutes from './routes/catalogRoutes.route.js';
 import configurableOptionRoutes from './routes/configurableOption.route.js';
 import openPay from './routes/openPay.route.js';
 import skydropxRoutes from './routes/skydropx.route.js';
-
+import s3Routes from './routes/s3.route.js'
 import { configureCors } from './utils/configureCors.js';
 
 const app = express();
@@ -37,5 +37,6 @@ app.use('/api', catalogRoutes);
 app.use('/api', configurableOptionRoutes);
 app.use('/api', openPay);
 app.use('/api', skydropxRoutes);
+app.use('/api/s3', s3Routes)
 
 export default app;
