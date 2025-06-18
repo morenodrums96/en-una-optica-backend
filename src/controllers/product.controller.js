@@ -1,5 +1,5 @@
 // src/controllers/product.controller.js
-import { getAllProductsServices, getCatalogByFilterServices, getProductSelectedServices, registrationProductServices } from '../services/product.service.js';
+import { getAllProductsServices, getCatalogByFilterServices, getProductSelectedServices, registrationProductServices, updateProdutsServices ,deleteProductServices} from '../services/product.service.js';
 
 
 export const getAllProducts = async (req, res) => {
@@ -77,3 +77,36 @@ export const registrationProduct = async (req, res) => {
 };
 
 
+export const updateProduts = async (req, res) => {
+  try {
+    const product = req.body; // ✅ CAMBIO
+
+     await updateProdutsServices(product);
+
+    return res.status(201).json({
+      message: 'Producto actualizado correctamente'
+    });
+  } catch (error) {
+    console.error('Error updateProduts:', error);
+    res.status(500).json({ message: 'Error del servidor' });
+  }
+};
+
+
+
+export const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deleted = await deleteProductServices(id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: 'Producto no encontrado' });
+    }
+
+    return res.status(200).json({ message: 'Producto eliminado correctamente' });
+  } catch (error) {
+    console.error('Error al eliminar producto:', error);
+    res.status(500).json({ message: 'Error del servidor' });
+  }
+};

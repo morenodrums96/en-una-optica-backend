@@ -1,9 +1,27 @@
 import { Product } from '../models/product.model.js';
 
 export const getAllProductsServices = async () => {
-    const products = Product.find();
+    const products = await Product.find({}, {
+        name: 1,
+        category: 1,
+        'variants.image': 1,
+        'variants.color': 1,
+        customerPrice: 1,
+        unitCost: 1
+    })
+        .sort({ createdAt: -1 })
+        .populate([
+            { path: 'frameMaterial' },
+            { path: 'faceShape' },
+            { path: 'frameShape' },
+            { path: 'variants.color' }
+        ])
+        .lean();
+
     return products;
 };
+
+
 
 export const getCatalogByFilterServices = async (
     page = 1,
@@ -73,18 +91,32 @@ export const getCatalogByFilterServices = async (
 
 
 export const getProductSelectedServices = async (id = null) => {
-
-    const products = Product.findById(id, {
-        _id: 1,
-        name: 1,
-        brand: 1,
-        customerPrice: 1,
-        variants: 1,
-        configurableOptions:1
-    }).populate('configurableOptions');//.populate('lensColor frameMaterial faceShape frameShape');
-    return products;
+  const product = await Product.findById(id)
+    .populate('frameMaterial faceShape frameShape configurableOptions variants.color');
+  return product;
 };
+
 
 export const registrationProductServices = async (product) => {
     return await Product.create(product); // ✅ Retornar el producto creado
 }
+
+export const updateProdutsServices = async (productData) => {
+  const { _id, ...rest } = productData;
+
+  const updatedProduct = await Product.findByIdAndUpdate(
+    _id,
+    { $set: rest },
+    { new: true, runValidators: true }
+  ).populate('frameMaterial faceShape frameShape configurableOptions variants.color');
+
+  if (!updatedProduct) {
+    throw new Error('Producto no encontrado');
+  }
+
+};
+
+
+export const deleteProductServices = async (id) => {
+  return await Product.findByIdAndDelete(id);
+};
