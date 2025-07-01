@@ -2,12 +2,14 @@ import cors from 'cors';
 
 export const configureCors = () => {
   const allowedOriginsDev = [
-    'http://localhost:3000'
+    'http://localhost:3000',
+    'https://7lpxzz-ip-189-203-91-230.tunnelmole.net'
   ];
 
   const allowedOriginsProd = [
     'https://enunaoptica.com',
-    'https://www.enunaoptica.com' // por si usas con www
+    'https://www.enunaoptica.com', // por si usas con www
+    'https://7lpxzz-ip-189-203-91-230.tunnelmole.net'
   ];
 
   const isProduction = process.env.NODE_ENV === 'production';

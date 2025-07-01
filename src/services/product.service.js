@@ -72,7 +72,7 @@ export const getCatalogByFilterServices = async (
         default:
             break;
     }
-    query.quantity = { $gt: 0 };
+    query['variants.quantity'] = { $gt: 0 };
 
     const products = await Product.find(query, {
         name: 1,
@@ -91,9 +91,9 @@ export const getCatalogByFilterServices = async (
 
 
 export const getProductSelectedServices = async (id = null) => {
-  const product = await Product.findById(id)
-    .populate('frameMaterial faceShape frameShape configurableOptions variants.color');
-  return product;
+    const product = await Product.findById(id)
+        .populate('frameMaterial faceShape frameShape configurableOptions variants.color');
+    return product;
 };
 
 
@@ -102,21 +102,21 @@ export const registrationProductServices = async (product) => {
 }
 
 export const updateProdutsServices = async (productData) => {
-  const { _id, ...rest } = productData;
+    const { _id, ...rest } = productData;
 
-  const updatedProduct = await Product.findByIdAndUpdate(
-    _id,
-    { $set: rest },
-    { new: true, runValidators: true }
-  ).populate('frameMaterial faceShape frameShape configurableOptions variants.color');
+    const updatedProduct = await Product.findByIdAndUpdate(
+        _id,
+        { $set: rest },
+        { new: true, runValidators: true }
+    ).populate('frameMaterial faceShape frameShape configurableOptions variants.color');
 
-  if (!updatedProduct) {
-    throw new Error('Producto no encontrado');
-  }
+    if (!updatedProduct) {
+        throw new Error('Producto no encontrado');
+    }
 
 };
 
 
 export const deleteProductServices = async (id) => {
-  return await Product.findByIdAndDelete(id);
+    return await Product.findByIdAndDelete(id);
 };
