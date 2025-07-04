@@ -120,3 +120,8 @@ export const updateProdutsServices = async (productData) => {
 export const deleteProductServices = async (id) => {
     return await Product.findByIdAndDelete(id);
 };
+
+
+export const getAllProductsByIdsServices = async (ids) => {
+  return await Product.find({ _id: { $in: ids } })
+}

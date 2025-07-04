@@ -2,7 +2,7 @@ import cors from 'cors';
 
 export const configureCors = () => {
   const allowedOriginsDev = [
-    'http://localhost:3000',
+    'http://localhost:3001',
     'https://7lpxzz-ip-189-203-91-230.tunnelmole.net'
   ];
 

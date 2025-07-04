@@ -1,5 +1,5 @@
 // src/controllers/product.controller.js
-import { getAllProductsServices, getCatalogByFilterServices, getProductSelectedServices, registrationProductServices, updateProdutsServices ,deleteProductServices} from '../services/product.service.js';
+import { getAllProductsServices, getCatalogByFilterServices, getProductSelectedServices, registrationProductServices, updateProdutsServices, deleteProductServices, getAllProductsByIdsServices } from '../services/product.service.js';
 
 
 export const getAllProducts = async (req, res) => {
@@ -81,7 +81,7 @@ export const updateProduts = async (req, res) => {
   try {
     const product = req.body; // ✅ CAMBIO
 
-     await updateProdutsServices(product);
+    await updateProdutsServices(product);
 
     return res.status(201).json({
       message: 'Producto actualizado correctamente'
@@ -110,3 +110,20 @@ export const deleteProduct = async (req, res) => {
     res.status(500).json({ message: 'Error del servidor' });
   }
 };
+
+
+export const getAllProductsByIds = async (req, res) => {
+  try {
+    const { ids } = req.body // Asegúrate de recibir un array
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: 'Se requiere un array de IDs' })
+    }
+
+    const products = await getAllProductsByIdsServices(ids)
+    res.json({ products })
+  } catch (error) {
+    console.error('Error al obtener productos por ID:', error)
+    res.status(500).json({ message: 'Error del servidor' })
+  }
+}
