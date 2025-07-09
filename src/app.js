@@ -37,6 +37,6 @@ app.use('/api', catalogRoutes);
 app.use('/api', configurableOptionRoutes);
 app.use('/api', openPay);
 app.use('/api', skydropxRoutes);
-app.use('/api/s3', s3Routes)
+app.use('/api', s3Routes)
 
 export default app;
