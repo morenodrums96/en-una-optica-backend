@@ -1,5 +1,14 @@
 // src/controllers/product.controller.js
-import { getAllProductsServices, getCatalogByFilterServices, getProductSelectedServices, registrationProductServices, updateProdutsServices, deleteProductServices, getAllProductsByIdsServices } from '../services/product.service.js';
+import {
+  getAllProductsServices,
+  getCatalogByFilterServices,
+  getProductSelectedServices,
+  registrationProductServices,
+  updateProdutsServices,
+  deleteProductServices,
+  getAllProductsByIdsServices,
+  getAllProductsByPagesServices
+} from '../services/product.service.js';
 
 
 export const getAllProducts = async (req, res) => {
@@ -127,3 +136,29 @@ export const getAllProductsByIds = async (req, res) => {
     res.status(500).json({ message: 'Error del servidor' })
   }
 }
+
+
+
+export const getAllProductsByPages = async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page) || 1)
+    const limit = Math.max(1, parseInt(req.query.limit) || 10)
+
+    const filters = {
+      name: req.query.name,
+      minPrice: req.query.minPrice ? parseFloat(req.query.minPrice) : undefined,
+      maxPrice: req.query.maxPrice ? parseFloat(req.query.maxPrice) : undefined,
+      unitCost: req.query.unitCost ? parseFloat(req.query.unitCost) : undefined,
+      createdAfter: req.query.createdAfter,
+      createdBefore: req.query.createdBefore,
+    }
+
+    const { products, total } = await getAllProductsByPagesServices(page, limit, filters)
+    res.json({ products, total })
+  } catch (error) {
+    console.error('Error al obtener productos por página:', error)
+    res.status(500).json({ message: 'Error del servidor' })
+  }
+}
+
+

@@ -137,3 +137,58 @@ export const deleteProductServices = async (id) => {
 export const getAllProductsByIdsServices = async (ids) => {
     return await Product.find({ _id: { $in: ids } })
 }
+
+
+
+export const getAllProductsByPagesServices = async (page, limit, filters = {}) => {
+    const skip = (page - 1) * limit;
+
+    const query = {}
+
+    if (filters.name) {
+        query.name = { $regex: filters.name, $options: 'i' } // búsqueda insensible
+    }
+
+    if (filters.minPrice !== undefined && filters.maxPrice !== undefined) {
+        query.customerPrice = { $gte: filters.minPrice, $lte: filters.maxPrice }
+    }
+
+    if (filters.unitCost !== undefined) {
+        query.unitCost = filters.unitCost
+    }
+
+    if (filters.createdAfter || filters.createdBefore) {
+        query.createdAt = {}
+        if (filters.createdAfter) {
+            query.createdAt.$gte = new Date(filters.createdAfter)
+        }
+        if (filters.createdBefore) {
+            query.createdAt.$lte = new Date(filters.createdBefore)
+        }
+    }
+
+    const [products, total] = await Promise.all([
+        Product.find(query, {
+            name: 1,
+            brand: 1,
+            model: 1,
+            unitCost: 1,
+            category: 1,
+            customerPrice: 1,
+            'variants._id': 1,
+            'variants.color': 1,
+            'variants.image': 1,
+            _id: 1,
+            createdAt: 1
+        })
+            .sort({ _id: -1 })
+            .skip(skip)
+            .limit(limit),
+        Product.countDocuments(query)
+    ])
+
+    return { products, total }
+}
+
+
+
