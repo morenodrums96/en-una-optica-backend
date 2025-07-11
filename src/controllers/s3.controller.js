@@ -1,7 +1,12 @@
-import dotenv from 'dotenv';
-dotenv.config();
-import AWS from 'aws-sdk';
-import path from 'path';
+// src/controllers/s3.controller.js
+
+import dotenv from 'dotenv'
+dotenv.config()
+
+import AWS from 'aws-sdk'
+import path from 'path'
+import { randomBytes } from 'crypto'
+
 const s3 = new AWS.S3({
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -9,73 +14,64 @@ const s3 = new AWS.S3({
   },
   region: process.env.AWS_REGION,
   signatureVersion: 'v4',
-});
-
+})
 
 function generarNombreArchivoPersonalizado(originalExt) {
-  const ahora = new Date();
-  const dia = String(ahora.getDate()).padStart(2, '0');
-  const mes = String(ahora.getMonth() + 1).padStart(2, '0');
-  const año = ahora.getFullYear();
-  const hora = String(ahora.getHours()).padStart(2, '0');
-  const minuto = String(ahora.getMinutes()).padStart(2, '0');
-  const segundo = String(ahora.getSeconds()).padStart(2, '0');
+  const ahora = new Date()
+  const dia = String(ahora.getDate()).padStart(2, '0')
+  const mes = String(ahora.getMonth() + 1).padStart(2, '0')
+  const año = ahora.getFullYear()
+  const hora = String(ahora.getHours()).padStart(2, '0')
+  const minuto = String(ahora.getMinutes()).padStart(2, '0')
+  const segundo = String(ahora.getSeconds()).padStart(2, '0')
+  const random = randomBytes(3).toString('hex') // asegura nombres únicos
 
-  return `EnUnaOptica_${dia}${mes}${año}_${hora}${minuto}${segundo}${originalExt}`;
+  return `EnUnaOptica_${dia}${mes}${año}_${hora}${minuto}${segundo}_${random}${originalExt}`
 }
 
-export const uploadImageToS3 = async (req, res) => {
+// ✅ SUBIR imagen a S3
+const uploadImageToS3 = async (req, res) => {
   try {
-    const file = req.file;
-    if (!file) return res.status(400).json({ error: 'Archivo no enviado' });
+    const file = req.file
+    if (!file) return res.status(400).json({ error: 'Archivo no enviado' })
 
-    const extension = path.extname(file.originalname);
-    const fileName = generarNombreArchivoPersonalizado(extension);
+    const extension = path.extname(file.originalname)
+    const fileName = generarNombreArchivoPersonalizado(extension)
 
     const params = {
       Bucket: process.env.S3_BUCKET_NAME,
       Key: fileName,
       Body: file.buffer,
       ContentType: file.mimetype,
-    };
+    }
 
-    // Subir el archivo original
-    await s3.upload(params).promise();
+    await s3.upload(params).promise()
 
-    // Convertir el archivo a formato .webp (simulado)
-    const optimizedFileName = fileName.replace(/\.[^.]+$/, '.webp');
-    const optimizedUrl = `https://enunaoptica-optimized-images.s3.${process.env.AWS_REGION}.amazonaws.com/${optimizedFileName}`;
+    const optimizedFileName = fileName.replace(/\.[^.]+$/, '.webp')
+    const optimizedUrl = `https://enunaoptica-optimized-images.s3.${process.env.AWS_REGION}.amazonaws.com/${optimizedFileName}`
 
-    // Devolver la URL del archivo optimizado
-    res.status(200).json({ url: optimizedUrl });
+    res.status(200).json({ url: optimizedUrl })
   } catch (error) {
-    console.error('Error al subir imagen:', error);
-    res.status(500).json({ error: 'Error al subir imagen' });
+    console.error('Error al subir imagen:', error)
+    res.status(500).json({ error: 'Error al subir imagen' })
   }
-};
+}
 
+const deleteFilesFromS3 = async (keys = []) => {
+  if (keys.length === 0) return
 
-// 🗑️ ELIMINAR imagen de S3
-export const deleteImageFromS3 = async (req, res) => {
-  const { url } = req.query
-  if (!url) {
-    return res.status(400).json({ error: 'URL no proporcionada' })
+  const params = {
+    Bucket: process.env.AWS_OPTIMIZED_BUCKET_NAME,
+    Delete: {
+      Objects: keys.map(Key => ({ Key })),
+      Quiet: false
+    }
   }
 
-  try {
-    const urlObj = new URL(url)
-    const Key = decodeURIComponent(urlObj.pathname).replace(/^\/+/, '')
+  await s3.deleteObjects(params).promise()
+}
 
-    await s3
-      .deleteObject({
-        Bucket: process.env.S3_BUCKET_NAME,
-        Key,
-      })
-      .promise()
-
-    res.status(200).json({ success: true })
-  } catch (error) {
-    console.error('Error al eliminar imagen de S3:', error)
-    res.status(500).json({ error: 'Error al eliminar imagen' })
-  }
+export {
+  uploadImageToS3,
+  deleteFilesFromS3
 }

@@ -1,4 +1,7 @@
 import { Product } from '../models/product.model.js';
+import { extractKeysFromVariants, cleanupS3Images } from '../utils/cleanProductImages.js'
+import { deleteFilesFromS3 } from '../controllers/s3.controller.js'
+
 
 export const getAllProductsServices = async () => {
     const products = await Product.find({}, {
@@ -101,27 +104,36 @@ export const registrationProductServices = async (product) => {
     return await Product.create(product); // ✅ Retornar el producto creado
 }
 
+
 export const updateProdutsServices = async (productData) => {
-    const { _id, ...rest } = productData;
+    const { _id, variants: newVariants, ...rest } = productData
 
-    const updatedProduct = await Product.findByIdAndUpdate(
+    const existingProduct = await Product.findById(_id)
+    if (!existingProduct) throw new Error('Producto no encontrado')
+
+    await cleanupS3Images(existingProduct.variants, newVariants)
+
+    return await Product.findByIdAndUpdate(
         _id,
-        { $set: rest },
+        { $set: { variants: newVariants, ...rest } },
         { new: true, runValidators: true }
-    ).populate('frameMaterial faceShape frameShape configurableOptions variants.color');
-
-    if (!updatedProduct) {
-        throw new Error('Producto no encontrado');
-    }
-
-};
+    ).populate('frameMaterial faceShape frameShape configurableOptions variants.color')
+}
 
 
 export const deleteProductServices = async (id) => {
-    return await Product.findByIdAndDelete(id);
-};
+    const product = await Product.findById(id)
+    if (!product) return null
+
+    const keys = extractKeysFromVariants(product.variants)
+    await deleteFilesFromS3(keys)
+
+    return await Product.findByIdAndDelete(id)
+}
+
+
 
 
 export const getAllProductsByIdsServices = async (ids) => {
-  return await Product.find({ _id: { $in: ids } })
+    return await Product.find({ _id: { $in: ids } })
 }
