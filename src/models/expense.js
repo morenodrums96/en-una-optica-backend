@@ -4,7 +4,7 @@ const ExpenseSchema = new mongoose.Schema(
     {
         type: {
             type: String,
-            enum: ['Gasto Indirecto', 'Costo Directo'],
+            enum: ['Gasto Fijo', 'Gasto Variable'],
             required: true,
         },
         description: {

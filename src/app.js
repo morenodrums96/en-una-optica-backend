@@ -14,6 +14,7 @@ import skydropxRoutes from './routes/skydropx.route.js';
 import s3Routes from './routes/s3.route.js'
 import { configureCors } from './utils/configureCors.js';
 import expenses from './routes/expenses.route.js';
+import financialReport from './routes/financialReport.route.js';
 
 const app = express();
 
@@ -38,6 +39,6 @@ app.use('/api', openPay);
 app.use('/api', skydropxRoutes);
 app.use('/api', s3Routes);
 app.use('/api', expenses)
-
+app.use('/api', financialReport)
 
 export default app;

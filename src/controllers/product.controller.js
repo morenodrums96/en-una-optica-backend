@@ -7,7 +7,8 @@ import {
   updateProdutsServices,
   deleteProductServices,
   getAllProductsByIdsServices,
-  getAllProductsByPagesServices
+  getAllProductsByPagesServices,
+  calculateCustomerPriceService
 } from '../services/product.service.js';
 
 
@@ -161,4 +162,18 @@ export const getAllProductsByPages = async (req, res) => {
   }
 }
 
+export const getCustomerPriceController = async (req, res) => {
+  try {
+    const unitCost = parseFloat(req.query.unitCost)
 
+    if (isNaN(unitCost)) {
+      return res.status(400).json({ error: 'unitCost inválido' })
+    }
+
+    const price = await calculateCustomerPriceService(unitCost)
+    return res.status(200).json({ customerPrice: price })
+  } catch (error) {
+    console.error('Error al calcular precio cliente:', error)
+    return res.status(500).json({ message: 'Error del servidor' })
+  }
+}

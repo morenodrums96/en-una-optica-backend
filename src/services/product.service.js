@@ -1,7 +1,8 @@
 import { Product } from '../models/product.model.js';
 import { extractKeysFromVariants, cleanupS3Images } from '../utils/cleanProductImages.js'
 import { deleteFilesFromS3 } from '../controllers/s3.controller.js'
-
+import { FinancialReport } from "../models/financialReports.model.js";
+import ExpenseModel from '../models/expense.js'
 
 export const getAllProductsServices = async () => {
     const products = await Product.find({}, {
@@ -23,7 +24,6 @@ export const getAllProductsServices = async () => {
 
     return products;
 };
-
 
 
 export const getCatalogByFilterServices = async (
@@ -178,7 +178,6 @@ export const getAllProductsByPagesServices = async (page, limit, filters = {}) =
             'variants._id': 1,
             'variants.color': 1,
             'variants.image': 1,
-            _id: 1,
             createdAt: 1
         })
             .sort({ _id: -1 })
@@ -191,4 +190,41 @@ export const getAllProductsByPagesServices = async (page, limit, filters = {}) =
 }
 
 
+export async function calculateCustomerPriceService(unitCost) {
+    const financialData = await FinancialReport.findOne()
+    if (!financialData || !financialData.desiredMargin || !financialData.projectedMonthlySales) {
+        throw new Error('Faltan datos financieros')
+    }
 
+    const marginPercent = financialData.desiredMargin
+    const projectedSales = financialData.projectedMonthlySales
+
+    // 🗓️ Rango del mes actual
+    const now = new Date()
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+
+    // 💰 Gastos del mes actual
+    const expenses = await ExpenseModel.find({
+        date: { $gte: firstDay, $lte: lastDay },
+    })
+
+    const gastosFijos = expenses.filter(e => e.type === 'Gasto Fijo')
+    const gastosVariables = expenses.filter(e => e.type === 'Gasto Variable')
+
+    const totalFijos = gastosFijos.reduce((sum, e) => sum + (e.amount || 0), 0)
+    const totalVariables = gastosVariables.reduce((sum, e) => sum + (e.amount || 0), 0)
+
+    // 🧾 Salarios (por ahora en 0)
+    const salarios = 0
+
+    // 💡 Reparto proporcional por unidad
+    const fijoPorUnidad = projectedSales > 0 ? (totalFijos + salarios) / projectedSales : 0
+    const variablePorUnidad = projectedSales > 0 ? totalVariables / projectedSales : 0
+
+    // 💰 Costo total por unidad y precio final con margen
+    const costoTotal = unitCost + fijoPorUnidad + variablePorUnidad
+    const precioFinal = costoTotal * (1 + marginPercent / 100)
+
+    return parseFloat(precioFinal.toFixed(2))
+}
