@@ -1,6 +1,6 @@
 // controllers/expenses.controller.js
 import {
-  getexpensestService,
+  getExpensesService,
   postExpensesService,
   deleteExpensesService,
   updateExpenseService,
@@ -8,13 +8,16 @@ import {
 
 export const getExpenses = async (req, res) => {
   try {
-    const data = await getexpensestService()
+    const { month, year } = req.query
+
+    const data = await getExpensesService({ month, year })
     res.status(200).json(data)
   } catch (error) {
     console.error('Error al obtener Expenses : ', error)
     res.status(500).json({ message: 'Error del servidor' })
   }
 }
+
 
 export const postExpenses = async (req, res) => {
   try {
