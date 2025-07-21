@@ -147,9 +147,9 @@ export const getAllProductsByPages = async (req, res) => {
 
     const filters = {
       name: req.query.name,
-      minPrice: req.query.minPrice ? parseFloat(req.query.minPrice) : undefined,
-      maxPrice: req.query.maxPrice ? parseFloat(req.query.maxPrice) : undefined,
-      unitCost: req.query.unitCost ? parseFloat(req.query.unitCost) : undefined,
+      minPrice: parseOptionalFloat(req.query.minPrice),
+      maxPrice: parseOptionalFloat(req.query.maxPrice),
+      unitCost: parseOptionalFloat(req.query.unitCost),
       createdAfter: req.query.createdAfter,
       createdBefore: req.query.createdBefore,
     }
@@ -162,6 +162,12 @@ export const getAllProductsByPages = async (req, res) => {
   }
 }
 
+function parseOptionalFloat(value) {
+  const parsed = parseFloat(value)
+  return isNaN(parsed) ? undefined : parsed
+}
+
+
 export const getCustomerPriceController = async (req, res) => {
   try {
     const unitCost = parseFloat(req.query.unitCost)
@@ -170,8 +176,12 @@ export const getCustomerPriceController = async (req, res) => {
       return res.status(400).json({ error: 'unitCost inválido' })
     }
 
-    const price = await calculateCustomerPriceService(unitCost)
-    return res.status(200).json({ customerPrice: price })
+    const prices = await calculateCustomerPriceService(unitCost)
+
+    return res.status(200).json({
+      customerPrice: prices.customerPrice,       // con IVA
+      priceWithoutVAT: prices.priceWithoutVAT,   // sin IVA
+    })
   } catch (error) {
     console.error('Error al calcular precio cliente:', error)
     return res.status(500).json({ message: 'Error del servidor' })

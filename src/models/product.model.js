@@ -35,7 +35,15 @@ const productSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-
+  discount: {
+    type: String,
+  },
+  discountedPriceWithoutVAT: {
+    type: Number,
+  },
+  discountedPriceWithVAT: {
+    type: Number,
+  },
   variants: [{
     color: {
       type: mongoose.Schema.Types.ObjectId,
@@ -64,10 +72,19 @@ const productSchema = new mongoose.Schema({
     required: true,
     min: 0,
   },
+  priceWithoutVAT: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
   frameMaterial: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Catalog',
     required: true
+  },
+  hasDiscount: {
+    type: Boolean,
+    default: false,
   },
   frond: {
     type: Boolean,
@@ -77,10 +94,7 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  iva: {
-    type: Boolean,
-    default: false,
-  }, faceShape: {
+  faceShape: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Catalog',
     required: true

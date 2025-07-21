@@ -3,6 +3,7 @@ import { extractKeysFromVariants, cleanupS3Images } from '../utils/cleanProductI
 import { deleteFilesFromS3 } from '../controllers/s3.controller.js'
 import { FinancialReport } from "../models/financialReports.model.js";
 import ExpenseModel from '../models/expense.js'
+import StockItemModel from '../models/StockItemSchema.js'
 
 export const getAllProductsServices = async () => {
     const products = await Product.find({}, {
@@ -149,8 +150,14 @@ export const getAllProductsByPagesServices = async (page, limit, filters = {}) =
         query.name = { $regex: filters.name, $options: 'i' } // búsqueda insensible
     }
 
-    if (filters.minPrice !== undefined && filters.maxPrice !== undefined) {
-        query.customerPrice = { $gte: filters.minPrice, $lte: filters.maxPrice }
+    if (filters.minPrice != null || filters.maxPrice != null) {
+        query.customerPrice = {}
+        if (filters.minPrice != null) {
+            query.customerPrice.$gte = filters.minPrice
+        }
+        if (filters.maxPrice != null) {
+            query.customerPrice.$lte = filters.maxPrice
+        }
     }
 
     if (filters.unitCost !== undefined) {
@@ -192,12 +199,11 @@ export const getAllProductsByPagesServices = async (page, limit, filters = {}) =
 
 export async function calculateCustomerPriceService(unitCost) {
     const financialData = await FinancialReport.findOne()
-    if (!financialData || !financialData.desiredMargin || !financialData.projectedMonthlySales) {
+    if (!financialData || !financialData.desiredMargin) {
         throw new Error('Faltan datos financieros')
     }
 
     const marginPercent = financialData.desiredMargin
-    const projectedSales = financialData.projectedMonthlySales
 
     // 🗓️ Rango del mes actual
     const now = new Date()
@@ -215,16 +221,25 @@ export async function calculateCustomerPriceService(unitCost) {
     const totalFijos = gastosFijos.reduce((sum, e) => sum + (e.amount || 0), 0)
     const totalVariables = gastosVariables.reduce((sum, e) => sum + (e.amount || 0), 0)
 
-    // 🧾 Salarios (por ahora en 0)
-    const salarios = 0
+    // 📦 Stock disponible actual
+    const stockItems = await StockItemModel.find()
+    const totalUnidades = stockItems.reduce((sum, item) => sum + (item.availableQuantity || 0), 0)
 
-    // 💡 Reparto proporcional por unidad
-    const fijoPorUnidad = projectedSales > 0 ? (totalFijos + salarios) / projectedSales : 0
-    const variablePorUnidad = projectedSales > 0 ? totalVariables / projectedSales : 0
+    if (totalUnidades === 0) {
+        throw new Error('No hay unidades en stock para calcular el precio')
+    }
 
-    // 💰 Costo total por unidad y precio final con margen
-    const costoTotal = unitCost + fijoPorUnidad + variablePorUnidad
-    const precioFinal = costoTotal * (1 + marginPercent / 100)
+    // 💡 Reparto proporcional de gastos por unidad
+    const gastoFijoPorUnidad = totalFijos / totalUnidades
+    const gastoVariablePorUnidad = totalVariables / totalUnidades
 
-    return parseFloat(precioFinal.toFixed(2))
+    // 🧾 Costo total y precio final
+    const costoTotalPorUnidad = unitCost + gastoFijoPorUnidad + gastoVariablePorUnidad
+    const precioSinIVA = parseFloat(costoTotalPorUnidad * (1 + marginPercent / 100).toFixed(2))
+    const precioConIVA = parseFloat((precioSinIVA * 1.16).toFixed(2)) // 16% de IVA
+
+    return {
+        priceWithoutVAT: precioSinIVA,
+        customerPrice: precioConIVA,
+    }
 }
