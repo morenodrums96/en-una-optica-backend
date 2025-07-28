@@ -15,6 +15,8 @@ import s3Routes from './routes/s3.route.js'
 import { configureCors } from './utils/configureCors.js';
 import expenses from './routes/expenses.route.js';
 import financialReport from './routes/financialReport.route.js';
+import wishlist from './routes/wishlist.route.js';
+import cart from './routes/cart.route.js';
 
 const app = express();
 
@@ -40,5 +42,7 @@ app.use('/api', skydropxRoutes);
 app.use('/api', s3Routes);
 app.use('/api', expenses)
 app.use('/api', financialReport)
+app.use('/api', wishlist)
+app.use('/api', cart)
 
 export default app;
