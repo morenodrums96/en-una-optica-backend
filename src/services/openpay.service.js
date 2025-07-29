@@ -1,18 +1,39 @@
-import OpenPay from 'openpay';
-import { Customer } from '../models/customer.model.js';
-import { Order } from '../models/order.model.js';
-import { Product } from '../models/product.model.js';
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+const Openpay = require('openpay')
 
-import dotenv from 'dotenv';
-dotenv.config();
-
-const openpay = new OpenPay(
+const openpay = new Openpay(
   process.env.OPENPAY_MERCHANT_ID,
   process.env.OPENPAY_PRIVATE_KEY,
-  false // true = sandbox, false = producción
-);
+  true // sandbox mode
+)
 
-openpay.setTimeout(20000);
+openpay.setTimeout(20000)
+
+console.log('🧪 Validando openpay.tokens:', typeof openpay.tokens) // 👈 Esto debería decir "function"
+
+export const createTokenWithOpenPay = (cardData) => {
+  return new Promise((resolve, reject) => {
+    if (!openpay.tokens) {
+      console.error('❌ openpay.tokens es undefined')
+      return reject(new Error('openpay.tokens está mal configurado'))
+    }
+
+    openpay.tokens.create(
+      cardData,
+      (response) => {
+        const tokenId = response.id
+        resolve({ tokenId })
+      },
+      (error) => {
+        console.error('❌ Error al generar token en servicio OpenPay:', error)
+        reject(new Error(error.description || 'No se pudo generar el token'))
+      }
+    )
+  })
+}
+
+
 
 export const createOpenPayCustomerService = async (customerId, sessionId) => {
   let customerData;
