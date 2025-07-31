@@ -10,6 +10,7 @@ const cartSchema = new mongoose.Schema(
         quantity: { type: Number, default: 1 },
       },
     ],
+    totalToPay: { type: Number, default: 0 }, // 👈 nuevo campo
   },
   { timestamps: true }
 )
