@@ -114,6 +114,29 @@ const orderSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  shippingData: {
+    quotation_id: { type: String },
+    selected_rate: {
+      id: String,
+      provider: String,
+      service_level: {
+        name: String,
+        token: String,
+      },
+      total: String,
+      days: Number,
+      currency: String,
+    },
+    shipment: {
+      id: String,
+      tracking_number: String,
+      status: String,
+      label_url: String,
+      estimated_delivery: String,
+      created_at: String,
+    }
+  },
+
   logs: [
     {
       action: String,

@@ -8,69 +8,59 @@ export const getAllOrderServices = async () => {
   return orders;
 };
 
+export const generateOrderServices = async ({
+  sessionId,
+  customerId,
+  products,
+  orderStatus,
+  shippingInfo,
+  totalAmount,
+  shippingData = {}
+}) => {
+  const newOrder = await Order.create({
+    sessionId,
+    customerId,
+    orderStatus,
+    orderIsSent: 'house',
+    paymentMethod: 'card',
+    products,
+    totalAmount: totalAmount,
+    correo: shippingInfo?.email,
+    cellphone: shippingInfo?.phone,
+    shippingInfo: {
+      name: shippingInfo?.name || '',
+      secondName: shippingInfo?.secondName || '',
+      secondLastName: shippingInfo?.secondLastName || '',
+      street: shippingInfo?.street || '',
+      externalNumber: shippingInfo?.externalNumber || '',
+      internalNumber: shippingInfo?.internalNumber || '',
+      postalCode: shippingInfo?.postalCode || '',
+      neighborhood: shippingInfo?.neighborhood || '',
+      city: shippingInfo?.city || '',
+      state: shippingInfo?.state || '',
+      aditionalReferents: shippingInfo?.aditionalReferents || '',
+    },
+    shippingData,
+    logs: [],
+  })
 
-export const generateOrderServices = async (orderInfo) => {
-  const { sessionId, customerId, products } = orderInfo;
+  // 👇 Aquí se corrige el uso de cart.productItems
+  await updateStockAfterOrder(products)
 
-  const filter = {
-    orderStatus: 'pending',
-    ...(customerId ? { customerId } : { sessionId })
-  };
+  // Agregar log del sistema
+  addOrderLog(newOrder, {
+    action: 'created',
+    message: 'Orden creada desde carrito de compras',
+    metadata: {
+      source: customerId ? 'customer' : 'guest',
+      totalAmount: Math.round(totalAmount * 100) / 100
+    },
+  })
 
-  let order = await Order.findOne(filter);
+  await newOrder.save()
+  return newOrder
+}
 
-  const productIds = products.map(p => p.productId);
-  const realProducts = await Product.find({ _id: { $in: productIds } });
-
-  let totalAmount = 0;
-  const enrichedProducts = [];
-
-  for (const p of products) {
-    const real = realProducts.find(rp => rp._id.toString() === p.productId.toString());
-    const customerPriceFrond = real?.customerPrice || 0;
-    const quantity = p.quantity || 1;
-    const baseTotal = customerPriceFrond * quantity;
-
-    const { enriched, subtotal } = await enrichConfigurableOptions(p.configurableOptions);
-
-    const totalByProduct = baseTotal + subtotal;
-    totalAmount += totalByProduct;
-
-    enrichedProducts.push({
-      productId: p.productId,
-      quantity,
-      customerPriceFrond,
-      totalByProduct: Math.round(totalByProduct * 100) / 100,
-      configurableOptions: enriched
-    });
-  }
-
-  if (order) {
-    order.products.push(...enrichedProducts);
-    order.totalAmount += Math.round(totalAmount * 100) / 100;
-    await order.save();
-    return order;
-  } else {
-    const newOrder = await Order.create({
-      ...orderInfo,
-      products: enrichedProducts,
-      totalAmount: Math.round(totalAmount * 100) / 100,
-      logs: []
-    });
-
-    addOrderLog(newOrder, {
-      action: 'created',
-      message: 'Orden creada desde carrito de compras',
-      metadata: {
-        source: customerId ? 'customer' : 'guest',
-        totalAmount: Math.round(totalAmount * 100) / 100
-      }
-    });
-
-    await newOrder.save();
-    return newOrder;
-  }
-};
 
 export const addOrderLog = (order, { action, message, metadata = {}, performedBy = 'system' }) => {
   order.logs.push({
@@ -82,6 +72,31 @@ export const addOrderLog = (order, { action, message, metadata = {}, performedBy
   });
 };
 
+export const updateStockAfterOrder = async (products) => {
+  for (const item of products) {
+    const product = await Product.findById(item.productId)
+    if (!product) continue
+
+    const { quantity } = item
+
+    // Buscar la variante correcta (si tienes un sistema para identificarla)
+    const variantIndex = product.variants.findIndex(v =>
+      item.configurableOptions?.some(group =>
+        group.options?.some(opt => v.color.toString() === opt._id?.toString())
+      )
+    )
+
+    if (variantIndex !== -1) {
+      product.variants[variantIndex].quantity = Math.max(
+        0,
+        product.variants[variantIndex].quantity - quantity
+      )
+    }
+
+    product.sales += quantity
+    await product.save()
+  }
+}
 
 export const enrichConfigurableOptions = async (configSelections = []) => {
   const enriched = [];
@@ -255,4 +270,3 @@ export const updateQuantityOrderService = async ({ customerId, sessionId, produc
   await order.save();
   return order;
 };
-

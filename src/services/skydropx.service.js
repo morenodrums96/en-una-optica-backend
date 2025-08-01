@@ -1,5 +1,6 @@
 import { getCachedToken } from '../services/skydropxTokenCache.service.js';
 import { Order } from "../models/order.model.js";
+const SKYDROPX_API_BASE = 'https://api-demo.skydropx.com/v1'
 
 import axios from 'axios';
 import dotenv from 'dotenv';
@@ -26,28 +27,6 @@ export const getSkydropxTokenService = async () => {
   });
 };
 
-
-export const getSkydropxQuoteService = async (quotationData) => {
-  try {
-    const token = '6f0fD5qt7cJE2pgXiHNgpzJVHm8iGiDuwUV5Ks8pYRE';//await getSkydropxTokenService();
-
-    const response = await axios.post(
-      'https://sb-pro.skydropx.com/api/v1/quotations',
-      { quotation: quotationData },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error('❌ Error cotizando en SkydropX:', error.response?.data || error.message);
-    throw new Error('No se pudo obtener la cotización de envío');
-  }
-};
 
 export const getSkydropxQuotationByIdService = async (quotationId, orderId) => {
   try {
@@ -160,3 +139,127 @@ export const getSkydropxQuotationByIdService = async (quotationId, orderId) => {
     throw new Error('No se pudo obtener la cotización');
   }
 };
+
+export const getSkydropxQuoteService = async (addressTo) => {
+  const quotationData = {
+    address_from: {
+      country_code: "mx",
+      postal_code: "06500",
+      area_level1: "Ciudad de México",
+      area_level2: "Cuauhtémoc",
+      area_level3: "Río Pánuco"
+    },
+    address_to: addressTo,
+    parcel: {
+      length: "20",
+      width: "10",
+      height: "10",
+      weight: "1.0"
+    },
+    requested_carriers: ["dhl", "fedex", "estafeta", "quiken"]
+  }
+
+  const token = await getSkydropxTokenService()
+
+  const response = await axios.post(
+    'https://sb-pro.skydropx.com/api/v1/quotations',
+    { quotation: quotationData },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  )
+
+  return response.data
+}
+
+
+export const getQuotationDetailsByIdService = async (quotationId, orderId) => {
+  try {
+    const token = await getSkydropxTokenService();
+
+    const response = await axios.get(
+      `https://sb-pro.skydropx.com/api/v1/quotations/${quotationId}?orderId=${orderId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('[Skydropx] Error al obtener detalles de cotización:', error?.response?.data || error.message);
+    throw new Error('No se pudo obtener detalles de cotización');
+  }
+};
+
+
+export const createSkydropxShipmentService = async (orderId) => {
+  const token = await getSkydropxTokenService()
+  const order = await Order.findById(orderId)
+  if (!order) throw new Error('Orden no encontrada')
+
+  const { quotation_id, selected_rate } = order.shippingData || {}
+  if (!quotation_id || !selected_rate?.id) {
+    throw new Error('Faltan datos de cotización para crear el envío')
+  }
+
+ const envio = await axios.post(
+      'https://sb-pro.skydropx.com/api/v1/shipments',
+      {
+        shipment: {
+          rate_id: selected_rate.id,
+          address_from: {
+            name: "En Una Óptica",
+            email: "contacto@enunaoptica.com",
+            phone: "5560670561",
+            street1: "Río Pánuco #183",
+            city: "Cuauhtémoc",
+            state: "Ciudad de México",
+            country: "MX",
+            zip: "06500",
+            reference: "Sucursal CDMX"
+          },
+          address_to: {
+            name: order.shippingInfo.name,
+            email: order.correo,
+            phone: order.cellphone,
+            street1: order.shippingInfo.street,
+            city: order.shippingInfo.city,
+            state: order.shippingInfo.state,
+            country: "MX",
+            zip: order.shippingInfo.postalCode,
+            reference: order.shippingInfo.aditionalReferents
+          },
+          parcels: [
+            {
+              length: 20,
+              width: 15,
+              height: 10,
+              weight: 1.5,
+              content: "Lentes ópticos"
+            }
+          ],
+          type: "delivery",
+          external_order_id: "ORD-TEST-001",
+          consignment_note: "31241501",
+          package_type: "4G"
+        }
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+
+  return {
+    shipment: envio.data
+  }
+}
