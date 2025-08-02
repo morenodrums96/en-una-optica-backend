@@ -24,24 +24,60 @@ const openpayClient = axios.create({
 })
 
 // Crear cliente
-export const createOpenPayCustomerService = async ({ anonymousId, name, email, phone, address }) => {
+export const createOrUpdateOpenPayCustomerService = async ({ anonymousId, name, lastName, email, phone, address }) => {
   const existing = await AnonymousCustomer.findOne({ anonymousId })
-  if (existing) return existing
 
-  const payload = {
-    name,
+  const openPayFormattedAddress = {
+    city: address.city,
+    line1: `${address.street} ${address.externalNumber}`,
+    line2: `${address.internalNumber} ${address.aditionalReferents || ''}`.trim(),
+    postal_code: address.postal_code,
+    state: address.state,
+    country_code: address.country_code,
+  }
+
+  const fullName = `${name} ${lastName}`.trim()
+
+  if (existing) {
+    const hasChanged =
+      existing.name !== name ||
+      existing.lastName !== lastName ||
+      existing.email !== email ||
+      existing.phone !== phone ||
+      JSON.stringify(existing.address) !== JSON.stringify(address)
+
+    if (hasChanged) {
+      await openpayClient.put(`/customers/${existing.openpayCustomerId}`, {
+        name: fullName,
+        email,
+        phone_number: phone,
+        address: openPayFormattedAddress,
+      })
+
+      existing.name = name
+      existing.lastName = lastName
+      existing.email = email
+      existing.phone = phone
+      existing.address = address
+      await existing.save()
+    }
+
+    return existing
+  }
+
+  const response = await openpayClient.post('/customers', {
+    name: fullName,
     email,
     phone_number: phone,
     requires_account: false,
-    address,
-  }
-
-  const response = await openpayClient.post('/customers', payload)
+    address: openPayFormattedAddress,
+  })
 
   const saved = await AnonymousCustomer.create({
     anonymousId,
     openpayCustomerId: response.data.id,
     name,
+    lastName,
     email,
     phone,
     address,
@@ -49,6 +85,7 @@ export const createOpenPayCustomerService = async ({ anonymousId, name, email, p
 
   return saved
 }
+
 
 // Crear cargo + orden + envío con cotización
 export const createChargeService = async ({ anonymousId, tokenIdOpenPay }) => {
@@ -88,13 +125,17 @@ export const createChargeService = async ({ anonymousId, tokenIdOpenPay }) => {
     totalAmount: cart.totalToPay,
     shippingInfo: {
       name: customer.name,
-      email: customer.email,
-      phone: customer.phone,
-      street: customer.address?.line1 || '',
+      lastName: customer.lastName || '',
+      street: customer.address?.street || '',
+      externalNumber: customer.address?.externalNumber || '',
+      internalNumber: customer.address?.internalNumber || '',
+      postalCode: customer.address?.postal_code || '',
+      neighborhood: customer.address?.neighborhood || '',
       city: customer.address?.city || '',
       state: customer.address?.state || '',
-      postalCode: customer.address?.postal_code || '',
-      aditionalReferents: customer.address?.line2 || ''
+      aditionalReferents: customer.address?.aditionalReferents || '',
+      email: customer.email,
+      phone: customer.phone
     },
     shippingData: {} // será llenado después
   })
@@ -105,8 +146,9 @@ export const createChargeService = async ({ anonymousId, tokenIdOpenPay }) => {
     postal_code: customer.address?.postal_code || '',
     area_level1: customer.address?.state || '',
     area_level2: customer.address?.city || '',
-    area_level3: customer.address?.line2 || '',
+    area_level3: customer.address?.neighborhood || customer.address?.aditionalReferents || '',
   })
+
 
   // 👉 4. Confirmar la cotización
   const confirmedQuotation = await getQuotationDetailsByIdService(quotation.id, tempOrder._id.toString())

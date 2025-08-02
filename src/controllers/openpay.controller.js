@@ -1,9 +1,9 @@
-import { createOpenPayCustomerService,createChargeService } from '../services/openpay.service.js';
+import { createOrUpdateOpenPayCustomerService, createChargeService } from '../services/openpay.service.js';
 
 export const createCustomer = async (req, res) => {
   try {
-    const { anonymousId, name, email, phone, address } = req.body
-    const customer = await createOpenPayCustomerService({ anonymousId, name, email, phone, address })
+    const { anonymousId, name, lastName, email, phone, address } = req.body
+    const customer = await createOrUpdateOpenPayCustomerService({ anonymousId, name, lastName, email, phone, address })
     res.status(200).json(customer)
   } catch (err) {
     console.error('❌ Error en createCustomer:', err)

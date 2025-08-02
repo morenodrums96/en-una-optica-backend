@@ -208,55 +208,56 @@ export const createSkydropxShipmentService = async (orderId) => {
     throw new Error('Faltan datos de cotización para crear el envío')
   }
 
- const envio = await axios.post(
-      'https://sb-pro.skydropx.com/api/v1/shipments',
-      {
-        shipment: {
-          rate_id: selected_rate.id,
-          address_from: {
-            name: "En Una Óptica",
-            email: "contacto@enunaoptica.com",
-            phone: "5560670561",
-            street1: "Río Pánuco #183",
-            city: "Cuauhtémoc",
-            state: "Ciudad de México",
-            country: "MX",
-            zip: "06500",
-            reference: "Sucursal CDMX"
-          },
-          address_to: {
-            name: order.shippingInfo.name,
-            email: order.correo,
-            phone: order.cellphone,
-            street1: order.shippingInfo.street,
-            city: order.shippingInfo.city,
-            state: order.shippingInfo.state,
-            country: "MX",
-            zip: order.shippingInfo.postalCode,
-            reference: order.shippingInfo.aditionalReferents
-          },
-          parcels: [
-            {
-              length: 20,
-              width: 15,
-              height: 10,
-              weight: 1.5,
-              content: "Lentes ópticos"
-            }
-          ],
-          type: "delivery",
-          external_order_id: "ORD-TEST-001",
-          consignment_note: "31241501",
-          package_type: "4G"
-        }
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+  const envio = await axios.post(
+    'https://sb-pro.skydropx.com/api/v1/shipments',
+    {
+      shipment: {
+        rate_id: selected_rate.id,
+        address_from: {
+          name: "En Una Óptica",
+          email: "contacto@enunaoptica.com",
+          phone: "5560670561",
+          street1: "Río Pánuco #183",
+          city: "Cuauhtémoc",
+          state: "Ciudad de México",
+          country: "MX",
+          zip: "06500",
+          reference: "Sucursal CDMX"
+        },
+        address_to: {
+          name: `${order.shippingInfo.name} ${order.shippingInfo.lastName}`.trim(),
+          email: order.correo,
+          phone: (order.cellphone || '').replace(/\D/g, '').slice(0, 10), // solo 10 dígitos
+          street1: order.shippingInfo.street || '',
+          external_number: order.shippingInfo.externalNumber || '',
+          city: order.shippingInfo.city || '',
+          state: order.shippingInfo.state || '',
+          country: "MX",
+          zip: order.shippingInfo.postalCode || '',
+          reference: `${order.shippingInfo.aditionalReferents || ''} ${order.shippingInfo.internalNumber || ''}`.trim() || 'Referencia no proporcionada',
+        },
+        parcels: [
+          {
+            length: 20,
+            width: 15,
+            height: 10,
+            weight: 1.5,
+            content: "Lentes ópticos"
+          }
+        ],
+        type: "delivery",
+        external_order_id: "ORD-TEST-001",
+        consignment_note: "31241501",
+        package_type: "4G"
       }
-    );
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  );
 
 
   return {

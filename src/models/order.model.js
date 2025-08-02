@@ -74,8 +74,7 @@ const orderSchema = new mongoose.Schema({
 
   shippingInfo: {
     name: String,
-    secondName: String,
-    secondLastName: String,
+    lastName: String,
     street: String,
     externalNumber: String,
     internalNumber: String,
